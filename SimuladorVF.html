@@ -818,6 +818,10 @@ const apiKeyInput = document.getElementById('apiKeyInput');
 const apiStatus   = document.getElementById('apiStatus');
 const btnFetchApi = document.getElementById('btnFetchApi');
 
+// Mostrar barra de API solo si la URL tiene ?admin=1
+const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
+document.querySelector('.api-bar').style.display = isAdmin ? 'flex' : 'none';
+
 // Restaurar key guardada (default pre-cargada)
 const DEFAULT_API_KEY = 'c8b4b456ed2a44aa9bc626d32bf334be';
 if (!localStorage.getItem(API_KEY_LS)) localStorage.setItem(API_KEY_LS, DEFAULT_API_KEY);

@@ -832,16 +832,29 @@ btnFetchApi.addEventListener('click', async () => {
   btnFetchApi.textContent = '⏳ Cargando…';
   apiStatus.textContent = '';
 
-  // Cuando el archivo se abre como file://, el origen es "null" y la API bloquea el preflight.
-  // Usamos corsproxy.io como intermediario para que el origen sea válido.
+  // Estrategia de fetch según origen:
+  // - Vercel (dominio propio): usa la función serverless /api/wc-results (sin CORS, key en env var)
+  // - file:// local: usa corsproxy.io como intermediario
+  // - Cualquier otro servidor HTTPS: intenta directo (solo funciona si el servidor permite CORS)
   const FD_URL = 'https://api.football-data.org/v4/competitions/WC/matches?season=2026';
-  const isFileOrigin = location.protocol === 'file:';
-  const fetchURL = isFileOrigin
-    ? 'https://corsproxy.io/?' + encodeURIComponent(FD_URL)
-    : FD_URL;
+  const proto = location.protocol;
+  const host  = location.hostname;
+  let fetchURL, fetchOpts;
+
+  if (proto !== 'file:' && (host.endsWith('vercel.app') || host.endsWith('simulador-mundial.vercel.app'))) {
+    // Serverless proxy — la key viene del env var de Vercel, no del campo
+    fetchURL  = '/api/wc-results';
+    fetchOpts = {};
+  } else if (proto === 'file:') {
+    fetchURL  = 'https://corsproxy.io/?' + encodeURIComponent(FD_URL);
+    fetchOpts = { headers: { 'X-Auth-Token': key } };
+  } else {
+    fetchURL  = FD_URL;
+    fetchOpts = { headers: { 'X-Auth-Token': key } };
+  }
 
   try {
-    const resp = await fetch(fetchURL, { headers: { 'X-Auth-Token': key } });
+    const resp = await fetch(fetchURL, fetchOpts);
     if (resp.status === 403) throw new Error('API key inválida o sin acceso al Mundial 2026');
     if (!resp.ok) throw new Error(`Error HTTP ${resp.status}`);
 

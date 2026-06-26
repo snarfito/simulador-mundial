@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulador Mundial 2026</title>
-<meta name="author" content="Fredy Hortua">
 <style>
   :root{
     --pitch:#0b3d2e;
@@ -56,12 +55,6 @@
     text-transform:uppercase;
   }
   .hero p{margin:0;color:#cfe3da;font-size:14px;}
-  .hero .credit{
-    position:absolute; top:14px; right:18px;
-    font-size:11px; font-weight:700; letter-spacing:0.4px; color:var(--gold);
-    background:rgba(0,0,0,0.22); border:1px solid rgba(212,163,55,0.35);
-    border-radius:999px; padding:4px 12px;
-  }
   .hero .stat{
     display:inline-flex;align-items:center;gap:8px;margin-top:12px;
     background:rgba(0,0,0,0.18); border-radius:999px; padding:6px 14px;
@@ -86,20 +79,38 @@
     border-color:var(--ink);
   }
   nav.tabs button:hover:not(.active){border-color:var(--gold-deep); color:var(--ink);}
- 
+
   .panel{display:none;}
   .panel.active{display:block;}
- 
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
   .toolbar button{
     background:var(--paper-2);border:1px solid var(--line);border-radius:8px;
     padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;
   }
   .toolbar button:hover{border-color:var(--coral);color:var(--coral);}
- 
+  .api-bar{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    background:var(--paper-2);border:1px solid var(--line);border-radius:10px;
+    padding:8px 12px;margin-bottom:14px;
+  }
+  .api-bar label{font-size:12px;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
+  .api-bar input{
+    flex:1;min-width:180px;border:1px solid var(--line);border-radius:6px;
+    padding:5px 9px;font-size:12.5px;font-family:monospace;color:var(--ink);
+  }
+  .api-bar input:focus{outline:2px solid var(--gold);border-color:var(--gold);}
+  #btnFetchApi{
+    background:var(--ink);color:#fff;border:none;border-radius:8px;
+    padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  #btnFetchApi:hover{background:#2a3a5c;}
+  #btnFetchApi:disabled{opacity:0.6;cursor:default;}
+  .api-status{font-size:11.5px;color:var(--ink-soft);}
+
   .groups-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(265px,1fr));
+    grid-template-columns:repeat(auto-fit, minmax(300px,1fr));
     gap:14px;
   }
   .group-card{
@@ -129,11 +140,11 @@
   table.standings tr.r3.out8{background:var(--red-tint);}
   table.standings tr.r4{background:#f4f4f4; color:#888;}
   table.standings tr td:first-child{font-weight:800; width:18px; color:var(--ink-soft);}
- 
+
   .matches-list{padding:10px 14px 14px;}
   .md-label{font-size:10.5px; text-transform:uppercase; letter-spacing:0.5px; color:var(--gold-deep); font-weight:800; margin:10px 0 4px;}
   .match-row{display:flex; align-items:center; gap:6px; padding:4px 0; font-size:13px;}
-  .match-row .tname{flex:1; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;}
+  .match-row .tname{flex:1; text-align:right;}
   .match-row .tname.away{text-align:left;}
   .match-row input[type=number]{
     width:34px; text-align:center; border:1px solid var(--line); border-radius:5px;
@@ -141,7 +152,7 @@
   }
   .match-row input[type=number]:focus{outline:2px solid var(--gold); border-color:var(--gold);}
   .match-row .dash{color:var(--ink-soft); font-weight:700;}
- 
+
   .thirds-wrap{background:var(--paper-2); border-radius:12px; border:1px solid var(--line); padding:6px; overflow-x:auto;}
   table.thirds{width:100%; border-collapse:collapse; font-size:13.5px;}
   table.thirds th{text-align:left;padding:9px 12px;font-size:11px;color:var(--ink-soft);border-bottom:2px solid var(--ink);text-transform:uppercase;}
@@ -152,7 +163,7 @@
   .pill.go{background:#2f7d4f; color:#fff;}
   .pill.no{background:var(--coral); color:#fff;}
   .note{font-size:12px; color:var(--ink-soft); background:var(--amber-tint); border-left:3px solid var(--gold-deep); padding:8px 12px; border-radius:6px; margin-top:12px;}
- 
+
   /* ---------- Cuadro eliminatorio (tema oscuro estilo bracket) ---------- */
   .ko-theme{
     --ko-bg:#0c0c0c; --ko-card:#1a1a1a; --ko-card-edge:#262626;
@@ -203,7 +214,7 @@
   .ko-emblem .num{font-family:'Arial Black','Segoe UI Black',sans-serif; font-size:34px; font-weight:900; color:var(--ko-accent); line-height:1;}
   .ko-emblem .cap{font-size:10px; letter-spacing:2px; color:var(--ko-dim2); text-transform:uppercase; margin-top:2px;}
   .ko-3rd-label{position:absolute; text-align:center; font-size:11px; font-weight:800; letter-spacing:0.8px; color:#d8d8d8; text-transform:uppercase;}
- 
+
   .ko-card{
     position:absolute;
     background:var(--ko-card); border:1px solid var(--ko-card-edge); border-radius:9px; overflow:hidden;
@@ -231,56 +242,47 @@
   .ko-team.loser{color:#565656; text-decoration:line-through; font-weight:500;}
   .ko-card.is-final{border:1.5px solid var(--ko-accent); box-shadow:0 0 18px rgba(211,236,44,0.12);}
   .ko-card.is-third{border-style:dashed;}
- 
+
   footer{text-align:center; color:#cfe3da; font-size:11.5px; margin-top:22px; opacity:0.8;}
- 
-  @media (max-width: 560px){
-    .wrap{padding:14px 10px 50px;}
-    .hero{padding:18px 16px;}
-    .hero h1{font-size:20px; padding-right:0;}
-    .hero p{font-size:13px;}
-    .hero .credit{position:static; display:inline-block; margin-bottom:10px;}
-    nav.tabs button{font-size:12.5px; padding:10px 8px;}
-    .toolbar{flex-direction:column;}
-    .toolbar button{width:100%; text-align:center;}
-    .groups-grid{grid-template-columns:1fr;}
-    .ko-head-row{flex-direction:column; align-items:flex-start; gap:8px;}
-    .ko-fs-btn{width:100%;}
-  }
 </style>
 </head>
 <body>
 <div class="wrap">
- 
+
   <div class="hero">
-    <div class="credit">Hecho por Fredy Hortua</div>
     <h1>Simulador Mundial 2026</h1>
     <p>Fase de grupos + cuadro eliminatorio con la estructura OFICIAL de la FIFA (Ronda de 32, combinaciones de terceros, octavos a la final). Edita cualquier resultado y mira cómo cambian las llaves al instante.</p>
     <div class="stat" id="progressStat">0/72 partidos de grupos completados</div>
   </div>
- 
+
   <nav class="tabs">
     <button class="tab-btn active" data-tab="grupos">Fase de Grupos</button>
     <button class="tab-btn" data-tab="terceros">Tabla de Terceros</button>
     <button class="tab-btn" data-tab="cuadro">Cuadro Eliminatorio</button>
   </nav>
- 
+
+  <div class="api-bar">
+    <label for="apiKeyInput">🔑 API Key (football-data.org):</label>
+    <input type="password" id="apiKeyInput" placeholder="Pega tu key gratuita aquí…" autocomplete="off">
+    <button id="btnFetchApi">🔄 Cargar resultados en vivo</button>
+    <span class="api-status" id="apiStatus"></span>
+  </div>
   <div class="toolbar">
-    <button id="btnResetReal">↺ Restaurar resultados reales (J1–J2) y limpiar J3 + eliminatorias</button>
+    <button id="btnResetReal">↺ Restaurar resultados reales (J1–J3 grupos A–F e I) y limpiar eliminatorias</button>
     <button id="btnClearAll">🗑 Vaciar todos los resultados</button>
   </div>
- 
+
   <div class="panel active" id="panel-grupos">
     <div class="groups-grid" id="groupsGrid"></div>
   </div>
- 
+
   <div class="panel" id="panel-terceros">
     <div class="thirds-wrap">
       <table class="thirds" id="thirdsTable"></table>
     </div>
     <div class="note">Los empates totales en puntos, diferencia de gol y goles anotados se resuelven oficialmente con el "team conduct score" (tarjetas) y el ranking FIFA — datos que este simulador no tiene. Si ves un empate justo en el límite del 8º puesto, FIFA podría decidirlo distinto a este simulador.</div>
   </div>
- 
+
   <div class="panel" id="panel-cuadro">
     <div class="ko-theme" id="koTheme">
       <div class="ko-head-row">
@@ -292,12 +294,12 @@
     <button id="btnFsClose" class="ko-fs-close" title="Salir de pantalla completa (Esc)">✕</button>
     <div class="note">El cruce de dieciseisavos (ronda de 32) sigue la tabla oficial de 495 combinaciones del Anexo C del reglamento FIFA 2026: ningún tercero se cruza con un equipo de su propio grupo. Haz clic sobre un equipo en cualquier llave para marcarlo como ganador y avanzar la ronda. En pantalla completa puedes salir con el botón ✕ o la tecla Esc.</div>
   </div>
- 
-  <footer>Hecho por Fredy Hortua · Datos de jornadas 1 y 2 tomados de los resultados reales suministrados · Jornada 3 y eliminatorias 100% editables · No se guarda al recargar la página.</footer>
+
+  <footer>J1–J3 de grupos A–F e I con resultados reales (26 jun 2026) · Grupos G, H, J, K, L jornada 3 pendientes · Eliminatorias 100% editables · No se guarda al recargar la página.</footer>
 </div>
- 
+
 <script>
-const APPDATA = {"teams": {"MEX": ["México", "A"], "RSA": ["Sudáfrica", "A"], "KOR": ["Corea del Sur", "A"], "CZE": ["Chequia", "A"], "CAN": ["Canadá", "B"], "BIH": ["Bosnia-Herz.", "B"], "QAT": ["Catar", "B"], "SUI": ["Suiza", "B"], "BRA": ["Brasil", "C"], "MAR": ["Marruecos", "C"], "HAI": ["Haití", "C"], "SCO": ["Escocia", "C"], "USA": ["Estados Unidos", "D"], "PAR": ["Paraguay", "D"], "AUS": ["Australia", "D"], "TUR": ["Turquía", "D"], "GER": ["Alemania", "E"], "CUW": ["Curazao", "E"], "CIV": ["Costa de Marfil", "E"], "ECU": ["Ecuador", "E"], "NED": ["Países Bajos", "F"], "JPN": ["Japón", "F"], "SWE": ["Suecia", "F"], "TUN": ["Túnez", "F"], "BEL": ["Bélgica", "G"], "EGY": ["Egipto", "G"], "IRN": ["RI de Irán", "G"], "NZL": ["Nueva Zelanda", "G"], "ESP": ["España", "H"], "CPV": ["Cabo Verde", "H"], "KSA": ["Arabia Saudita", "H"], "URU": ["Uruguay", "H"], "FRA": ["Francia", "I"], "SEN": ["Senegal", "I"], "IRQ": ["Irak", "I"], "NOR": ["Noruega", "I"], "ARG": ["Argentina", "J"], "ALG": ["Argelia", "J"], "AUT": ["Austria", "J"], "JOR": ["Jordania", "J"], "POR": ["Portugal", "K"], "COD": ["RD Congo", "K"], "UZB": ["Uzbekistán", "K"], "COL": ["Colombia", "K"], "ENG": ["Inglaterra", "L"], "CRO": ["Croacia", "L"], "GHA": ["Ghana", "L"], "PAN": ["Panamá", "L"]}, "groups": {"A": ["MEX", "RSA", "KOR", "CZE"], "B": ["CAN", "BIH", "QAT", "SUI"], "C": ["BRA", "MAR", "HAI", "SCO"], "D": ["USA", "PAR", "AUS", "TUR"], "E": ["GER", "CUW", "CIV", "ECU"], "F": ["NED", "JPN", "SWE", "TUN"], "G": ["BEL", "EGY", "IRN", "NZL"], "H": ["ESP", "CPV", "KSA", "URU"], "I": ["FRA", "SEN", "IRQ", "NOR"], "J": ["ARG", "ALG", "AUT", "JOR"], "K": ["POR", "COD", "UZB", "COL"], "L": ["ENG", "CRO", "GHA", "PAN"]}, "matches": [{"id": "g1", "group": "A", "md": 1, "home": "MEX", "away": "RSA", "hg": 2, "ag": 0}, {"id": "g2", "group": "A", "md": 1, "home": "KOR", "away": "CZE", "hg": 2, "ag": 1}, {"id": "g3", "group": "B", "md": 1, "home": "CAN", "away": "BIH", "hg": 1, "ag": 1}, {"id": "g4", "group": "D", "md": 1, "home": "USA", "away": "PAR", "hg": 4, "ag": 1}, {"id": "g5", "group": "B", "md": 1, "home": "QAT", "away": "SUI", "hg": 1, "ag": 1}, {"id": "g6", "group": "C", "md": 1, "home": "BRA", "away": "MAR", "hg": 1, "ag": 1}, {"id": "g7", "group": "C", "md": 1, "home": "HAI", "away": "SCO", "hg": 0, "ag": 1}, {"id": "g8", "group": "D", "md": 1, "home": "AUS", "away": "TUR", "hg": 2, "ag": 0}, {"id": "g9", "group": "E", "md": 1, "home": "GER", "away": "CUW", "hg": 7, "ag": 1}, {"id": "g10", "group": "F", "md": 1, "home": "NED", "away": "JPN", "hg": 2, "ag": 2}, {"id": "g11", "group": "E", "md": 1, "home": "CIV", "away": "ECU", "hg": 1, "ag": 0}, {"id": "g12", "group": "F", "md": 1, "home": "SWE", "away": "TUN", "hg": 5, "ag": 1}, {"id": "g13", "group": "H", "md": 1, "home": "ESP", "away": "CPV", "hg": 0, "ag": 0}, {"id": "g14", "group": "G", "md": 1, "home": "BEL", "away": "EGY", "hg": 1, "ag": 1}, {"id": "g15", "group": "H", "md": 1, "home": "KSA", "away": "URU", "hg": 1, "ag": 1}, {"id": "g16", "group": "G", "md": 1, "home": "IRN", "away": "NZL", "hg": 2, "ag": 2}, {"id": "g17", "group": "I", "md": 1, "home": "FRA", "away": "SEN", "hg": 3, "ag": 1}, {"id": "g18", "group": "I", "md": 1, "home": "IRQ", "away": "NOR", "hg": 1, "ag": 4}, {"id": "g19", "group": "J", "md": 1, "home": "ARG", "away": "ALG", "hg": 3, "ag": 0}, {"id": "g20", "group": "J", "md": 1, "home": "AUT", "away": "JOR", "hg": 3, "ag": 1}, {"id": "g21", "group": "K", "md": 1, "home": "POR", "away": "COD", "hg": 1, "ag": 1}, {"id": "g22", "group": "L", "md": 1, "home": "ENG", "away": "CRO", "hg": 4, "ag": 2}, {"id": "g23", "group": "L", "md": 1, "home": "GHA", "away": "PAN", "hg": 1, "ag": 0}, {"id": "g24", "group": "K", "md": 1, "home": "UZB", "away": "COL", "hg": 1, "ag": 3}, {"id": "g25", "group": "A", "md": 2, "home": "CZE", "away": "RSA", "hg": 1, "ag": 1}, {"id": "g26", "group": "B", "md": 2, "home": "SUI", "away": "BIH", "hg": 4, "ag": 1}, {"id": "g27", "group": "B", "md": 2, "home": "CAN", "away": "QAT", "hg": 6, "ag": 0}, {"id": "g28", "group": "A", "md": 2, "home": "MEX", "away": "KOR", "hg": 1, "ag": 0}, {"id": "g29", "group": "D", "md": 2, "home": "USA", "away": "AUS", "hg": 2, "ag": 0}, {"id": "g30", "group": "C", "md": 2, "home": "SCO", "away": "MAR", "hg": 0, "ag": 1}, {"id": "g31", "group": "C", "md": 2, "home": "BRA", "away": "HAI", "hg": 3, "ag": 0}, {"id": "g32", "group": "D", "md": 2, "home": "TUR", "away": "PAR", "hg": 0, "ag": 1}, {"id": "g33", "group": "F", "md": 2, "home": "NED", "away": "SWE", "hg": 5, "ag": 1}, {"id": "g34", "group": "E", "md": 2, "home": "GER", "away": "CIV", "hg": 2, "ag": 1}, {"id": "g35", "group": "E", "md": 2, "home": "ECU", "away": "CUW", "hg": 0, "ag": 0}, {"id": "g36", "group": "F", "md": 2, "home": "TUN", "away": "JPN", "hg": 0, "ag": 4}, {"id": "g37", "group": "H", "md": 2, "home": "ESP", "away": "KSA", "hg": 4, "ag": 0}, {"id": "g38", "group": "G", "md": 2, "home": "BEL", "away": "IRN", "hg": 0, "ag": 0}, {"id": "g39", "group": "H", "md": 2, "home": "URU", "away": "CPV", "hg": 2, "ag": 2}, {"id": "g40", "group": "G", "md": 2, "home": "NZL", "away": "EGY", "hg": 1, "ag": 3}, {"id": "g41", "group": "J", "md": 2, "home": "ARG", "away": "AUT", "hg": 2, "ag": 0}, {"id": "g42", "group": "I", "md": 2, "home": "FRA", "away": "IRQ", "hg": 3, "ag": 0}, {"id": "g43", "group": "I", "md": 2, "home": "NOR", "away": "SEN", "hg": 3, "ag": 2}, {"id": "g44", "group": "J", "md": 2, "home": "JOR", "away": "ALG", "hg": 1, "ag": 2}, {"id": "g45", "group": "K", "md": 2, "home": "POR", "away": "UZB", "hg": 5, "ag": 0}, {"id": "g46", "group": "L", "md": 2, "home": "ENG", "away": "GHA", "hg": 0, "ag": 0}, {"id": "g47", "group": "L", "md": 2, "home": "PAN", "away": "CRO", "hg": 0, "ag": 1}, {"id": "g48", "group": "K", "md": 2, "home": "COL", "away": "COD", "hg": 1, "ag": 0}, {"id": "g49", "group": "B", "md": 3, "home": "SUI", "away": "CAN", "hg": null, "ag": null}, {"id": "g50", "group": "B", "md": 3, "home": "BIH", "away": "QAT", "hg": null, "ag": null}, {"id": "g51", "group": "C", "md": 3, "home": "SCO", "away": "BRA", "hg": null, "ag": null}, {"id": "g52", "group": "C", "md": 3, "home": "MAR", "away": "HAI", "hg": null, "ag": null}, {"id": "g53", "group": "A", "md": 3, "home": "CZE", "away": "MEX", "hg": null, "ag": null}, {"id": "g54", "group": "A", "md": 3, "home": "RSA", "away": "KOR", "hg": null, "ag": null}, {"id": "g55", "group": "E", "md": 3, "home": "CUW", "away": "CIV", "hg": null, "ag": null}, {"id": "g56", "group": "E", "md": 3, "home": "ECU", "away": "GER", "hg": null, "ag": null}, {"id": "g57", "group": "F", "md": 3, "home": "JPN", "away": "SWE", "hg": null, "ag": null}, {"id": "g58", "group": "F", "md": 3, "home": "TUN", "away": "NED", "hg": null, "ag": null}, {"id": "g59", "group": "D", "md": 3, "home": "TUR", "away": "USA", "hg": null, "ag": null}, {"id": "g60", "group": "D", "md": 3, "home": "PAR", "away": "AUS", "hg": null, "ag": null}, {"id": "g61", "group": "I", "md": 3, "home": "NOR", "away": "FRA", "hg": null, "ag": null}, {"id": "g62", "group": "I", "md": 3, "home": "SEN", "away": "IRQ", "hg": null, "ag": null}, {"id": "g63", "group": "H", "md": 3, "home": "CPV", "away": "KSA", "hg": null, "ag": null}, {"id": "g64", "group": "H", "md": 3, "home": "URU", "away": "ESP", "hg": null, "ag": null}, {"id": "g65", "group": "G", "md": 3, "home": "EGY", "away": "IRN", "hg": null, "ag": null}, {"id": "g66", "group": "G", "md": 3, "home": "NZL", "away": "BEL", "hg": null, "ag": null}, {"id": "g67", "group": "L", "md": 3, "home": "PAN", "away": "ENG", "hg": null, "ag": null}, {"id": "g68", "group": "L", "md": 3, "home": "CRO", "away": "GHA", "hg": null, "ag": null}, {"id": "g69", "group": "K", "md": 3, "home": "COL", "away": "POR", "hg": null, "ag": null}, {"id": "g70", "group": "K", "md": 3, "home": "COD", "away": "UZB", "hg": null, "ag": null}, {"id": "g71", "group": "J", "md": 3, "home": "ALG", "away": "AUT", "hg": null, "ag": null}, {"id": "g72", "group": "J", "md": 3, "home": "JOR", "away": "ARG", "hg": null, "ag": null}], "combo": [[["E", "F", "G", "H", "I", "J", "K", "L"], ["E", "J", "I", "F", "H", "G", "L", "K"]], [["D", "F", "G", "H", "I", "J", "K", "L"], ["H", "G", "I", "D", "J", "F", "L", "K"]], [["D", "E", "G", "H", "I", "J", "K", "L"], ["E", "J", "I", "D", "H", "G", "L", "K"]], [["D", "E", "F", "H", "I", "J", "K", "L"], ["E", "J", "I", "D", "H", "F", "L", "K"]], [["D", "E", "F", "G", "I", "J", "K", "L"], ["E", "G", "I", "D", "J", "F", "L", "K"]], [["D", "E", "F", "G", "H", "J", "K", "L"], ["E", "G", "J", "D", "H", "F", "L", "K"]], [["D", "E", "F", "G", "H", "I", "K", "L"], ["E", "G", "I", "D", "H", "F", "L", "K"]], [["D", "E", "F", "G", "H", "I", "J", "L"], ["E", "G", "J", "D", "H", "F", "L", "I"]], [["D", "E", "F", "G", "H", "I", "J", "K"], ["E", "G", "J", "D", "H", "F", "I", "K"]], [["C", "F", "G", "H", "I", "J", "K", "L"], ["H", "G", "I", "C", "J", "F", "L", "K"]], [["C", "E", "G", "H", "I", "J", "K", "L"], ["E", "J", "I", "C", "H", "G", "L", "K"]], [["C", "E", "F", "H", "I", "J", "K", "L"], ["E", "J", "I", "C", "H", "F", "L", "K"]], [["C", "E", "F", "G", "I", "J", "K", "L"], ["E", "G", "I", "C", "J", "F", "L", "K"]], [["C", "E", "F", "G", "H", "J", "K", "L"], ["E", "G", "J", "C", "H", "F", "L", "K"]], [["C", "E", "F", "G", "H", "I", "K", "L"], ["E", "G", "I", "C", "H", "F", "L", "K"]], [["C", "E", "F", "G", "H", "I", "J", "L"], ["E", "G", "J", "C", "H", "F", "L", "I"]], [["C", "E", "F", "G", "H", "I", "J", "K"], ["E", "G", "J", "C", "H", "F", "I", "K"]], [["C", "D", "G", "H", "I", "J", "K", "L"], ["H", "G", "I", "C", "J", "D", "L", "K"]], [["C", "D", "F", "H", "I", "J", "K", "L"], ["C", "J", "I", "D", "H", "F", "L", "K"]], [["C", "D", "F", "G", "I", "J", "K", "L"], ["C", "G", "I", "D", "J", "F", "L", "K"]], [["C", "D", "F", "G", "H", "J", "K", "L"], ["C", "G", "J", "D", "H", "F", "L", "K"]], [["C", "D", "F", "G", "H", "I", "K", "L"], ["C", "G", "I", "D", "H", "F", "L", "K"]], [["C", "D", "F", "G", "H", "I", "J", "L"], ["C", "G", "J", "D", "H", "F", "L", "I"]], [["C", "D", "F", "G", "H", "I", "J", "K"], ["C", "G", "J", "D", "H", "F", "I", "K"]], [["C", "D", "E", "H", "I", "J", "K", "L"], ["E", "J", "I", "C", "H", "D", "L", "K"]], [["C", "D", "E", "G", "I", "J", "K", "L"], ["E", "G", "I", "C", "J", "D", "L", "K"]], [["C", "D", "E", "G", "H", "J", "K", "L"], ["E", "G", "J", "C", "H", "D", "L", "K"]], [["C", "D", "E", "G", "H", "I", "K", "L"], ["E", "G", "I", "C", "H", "D", "L", "K"]], [["C", "D", "E", "G", "H", "I", "J", "L"], ["E", "G", "J", "C", "H", "D", "L", "I"]], [["C", "D", "E", "G", "H", "I", "J", "K"], ["E", "G", "J", "C", "H", "D", "I", "K"]], [["C", "D", "E", "F", "I", "J", "K", "L"], ["C", "J", "E", "D", "I", "F", "L", "K"]], [["C", "D", "E", "F", "H", "J", "K", "L"], ["C", "J", "E", "D", "H", "F", "L", "K"]], [["C", "D", "E", "F", "H", "I", "K", "L"], ["C", "E", "I", "D", "H", "F", "L", "K"]], [["C", "D", "E", "F", "H", "I", "J", "L"], ["C", "J", "E", "D", "H", "F", "L", "I"]], [["C", "D", "E", "F", "H", "I", "J", "K"], ["C", "J", "E", "D", "H", "F", "I", "K"]], [["C", "D", "E", "F", "G", "J", "K", "L"], ["C", "G", "E", "D", "J", "F", "L", "K"]], [["C", "D", "E", "F", "G", "I", "K", "L"], ["C", "G", "E", "D", "I", "F", "L", "K"]], [["C", "D", "E", "F", "G", "I", "J", "L"], ["C", "G", "E", "D", "J", "F", "L", "I"]], [["C", "D", "E", "F", "G", "I", "J", "K"], ["C", "G", "E", "D", "J", "F", "I", "K"]], [["C", "D", "E", "F", "G", "H", "K", "L"], ["C", "G", "E", "D", "H", "F", "L", "K"]], [["C", "D", "E", "F", "G", "H", "J", "L"], ["C", "G", "J", "D", "H", "F", "L", "E"]], [["C", "D", "E", "F", "G", "H", "J", "K"], ["C", "G", "J", "D", "H", "F", "E", "K"]], [["C", "D", "E", "F", "G", "H", "I", "L"], ["C", "G", "E", "D", "H", "F", "L", "I"]], [["C", "D", "E", "F", "G", "H", "I", "K"], ["C", "G", "E", "D", "H", "F", "I", "K"]], [["C", "D", "E", "F", "G", "H", "I", "J"], ["C", "G", "J", "D", "H", "F", "E", "I"]], [["B", "F", "G", "H", "I", "J", "K", "L"], ["H", "J", "B", "F", "I", "G", "L", "K"]], [["B", "E", "G", "H", "I", "J", "K", "L"], ["E", "J", "I", "B", "H", "G", "L", "K"]], [["B", "E", "F", "H", "I", "J", "K", "L"], ["E", "J", "B", "F", "I", "H", "L", "K"]], [["B", "E", "F", "G", "I", "J", "K", "L"], ["E", "J", "B", "F", "I", "G", "L", "K"]], [["B", "E", "F", "G", "H", "J", "K", "L"], ["E", "J", "B", "F", "H", "G", "L", "K"]], [["B", "E", "F", "G", "H", "I", "K", "L"], ["E", "G", "B", "F", "I", "H", "L", "K"]], [["B", "E", "F", "G", "H", "I", "J", "L"], ["E", "J", "B", "F", "H", "G", "L", "I"]], [["B", "E", "F", "G", "H", "I", "J", "K"], ["E", "J", "B", "F", "H", "G", "I", "K"]], [["B", "D", "G", "H", "I", "J", "K", "L"], ["H", "J", "B", "D", "I", "G", "L", "K"]], [["B", "D", "F", "H", "I", "J", "K", "L"], ["H", "J", "B", "D", "I", "F", "L", "K"]], [["B", "D", "F", "G", "I", "J", "K", "L"], ["I", "G", "B", "D", "J", "F", "L", "K"]], [["B", "D", "F", "G", "H", "J", "K", "L"], ["H", "G", "B", "D", "J", "F", "L", "K"]], [["B", "D", "F", "G", "H", "I", "K", "L"], ["H", "G", "B", "D", "I", "F", "L", "K"]], [["B", "D", "F", "G", "H", "I", "J", "L"], ["H", "G", "B", "D", "J", "F", "L", "I"]], [["B", "D", "F", "G", "H", "I", "J", "K"], ["H", "G", "B", "D", "J", "F", "I", "K"]], [["B", "D", "E", "H", "I", "J", "K", "L"], ["E", "J", "B", "D", "I", "H", "L", "K"]], [["B", "D", "E", "G", "I", "J", "K", "L"], ["E", "J", "B", "D", "I", "G", "L", "K"]], [["B", "D", "E", "G", "H", "J", "K", "L"], ["E", "J", "B", "D", "H", "G", "L", "K"]], [["B", "D", "E", "G", "H", "I", "K", "L"], ["E", "G", "B", "D", "I", "H", "L", "K"]], [["B", "D", "E", "G", "H", "I", "J", "L"], ["E", "J", "B", "D", "H", "G", "L", "I"]], [["B", "D", "E", "G", "H", "I", "J", "K"], ["E", "J", "B", "D", "H", "G", "I", "K"]], [["B", "D", "E", "F", "I", "J", "K", "L"], ["E", "J", "B", "D", "I", "F", "L", "K"]], [["B", "D", "E", "F", "H", "J", "K", "L"], ["E", "J", "B", "D", "H", "F", "L", "K"]], [["B", "D", "E", "F", "H", "I", "K", "L"], ["E", "I", "B", "D", "H", "F", "L", "K"]], [["B", "D", "E", "F", "H", "I", "J", "L"], ["E", "J", "B", "D", "H", "F", "L", "I"]], [["B", "D", "E", "F", "H", "I", "J", "K"], ["E", "J", "B", "D", "H", "F", "I", "K"]], [["B", "D", "E", "F", "G", "J", "K", "L"], ["E", "G", "B", "D", "J", "F", "L", "K"]], [["B", "D", "E", "F", "G", "I", "K", "L"], ["E", "G", "B", "D", "I", "F", "L", "K"]], [["B", "D", "E", "F", "G", "I", "J", "L"], ["E", "G", "B", "D", "J", "F", "L", "I"]], [["B", "D", "E", "F", "G", "I", "J", "K"], ["E", "G", "B", "D", "J", "F", "I", "K"]], [["B", "D", "E", "F", "G", "H", "K", "L"], ["E", "G", "B", "D", "H", "F", "L", "K"]], [["B", "D", "E", "F", "G", "H", "J", "L"], ["H", "G", "B", "D", "J", "F", "L", "E"]], [["B", "D", "E", "F", "G", "H", "J", "K"], ["H", "G", "B", "D", "J", "F", "E", "K"]], [["B", "D", "E", "F", "G", "H", "I", "L"], ["E", "G", "B", "D", "H", "F", "L", "I"]], [["B", "D", "E", "F", "G", "H", "I", "K"], ["E", "G", "B", "D", "H", "F", "I", "K"]], [["B", "D", "E", "F", "G", "H", "I", "J"], ["H", "G", "B", "D", "J", "F", "E", "I"]], [["B", "C", "G", "H", "I", "J", "K", "L"], ["H", "J", "B", "C", "I", "G", "L", "K"]], [["B", "C", "F", "H", "I", "J", "K", "L"], ["H", "J", "B", "C", "I", "F", "L", "K"]], [["B", "C", "F", "G", "I", "J", "K", "L"], ["I", "G", "B", "C", "J", "F", "L", "K"]], [["B", "C", "F", "G", "H", "J", "K", "L"], ["H", "G", "B", "C", "J", "F", "L", "K"]], [["B", "C", "F", "G", "H", "I", "K", "L"], ["H", "G", "B", "C", "I", "F", "L", "K"]], [["B", "C", "F", "G", "H", "I", "J", "L"], ["H", "G", "B", "C", "J", "F", "L", "I"]], [["B", "C", "F", "G", "H", "I", "J", "K"], ["H", "G", "B", "C", "J", "F", "I", "K"]], [["B", "C", "E", "H", "I", "J", "K", "L"], ["E", "J", "B", "C", "I", "H", "L", "K"]], [["B", "C", "E", "G", "I", "J", "K", "L"], ["E", "J", "B", "C", "I", "G", "L", "K"]], [["B", "C", "E", "G", "H", "J", "K", "L"], ["E", "J", "B", "C", "H", "G", "L", "K"]], [["B", "C", "E", "G", "H", "I", "K", "L"], ["E", "G", "B", "C", "I", "H", "L", "K"]], [["B", "C", "E", "G", "H", "I", "J", "L"], ["E", "J", "B", "C", "H", "G", "L", "I"]], [["B", "C", "E", "G", "H", "I", "J", "K"], ["E", "J", "B", "C", "H", "G", "I", "K"]], [["B", "C", "E", "F", "I", "J", "K", "L"], ["E", "J", "B", "C", "I", "F", "L", "K"]], [["B", "C", "E", "F", "H", "J", "K", "L"], ["E", "J", "B", "C", "H", "F", "L", "K"]], [["B", "C", "E", "F", "H", "I", "K", "L"], ["E", "I", "B", "C", "H", "F", "L", "K"]], [["B", "C", "E", "F", "H", "I", "J", "L"], ["E", "J", "B", "C", "H", "F", "L", "I"]], [["B", "C", "E", "F", "H", "I", "J", "K"], ["E", "J", "B", "C", "H", "F", "I", "K"]], [["B", "C", "E", "F", "G", "J", "K", "L"], ["E", "G", "B", "C", "J", "F", "L", "K"]], [["B", "C", "E", "F", "G", "I", "K", "L"], ["E", "G", "B", "C", "I", "F", "L", "K"]], [["B", "C", "E", "F", "G", "I", "J", "L"], ["E", "G", "B", "C", "J", "F", "L", "I"]], [["B", "C", "E", "F", "G", "I", "J", "K"], ["E", "G", "B", "C", "J", "F", "I", "K"]], [["B", "C", "E", "F", "G", "H", "K", "L"], ["E", "G", "B", "C", "H", "F", "L", "K"]], [["B", "C", "E", "F", "G", "H", "J", "L"], ["H", "G", "B", "C", "J", "F", "L", "E"]], [["B", "C", "E", "F", "G", "H", "J", "K"], ["H", "G", "B", "C", "J", "F", "E", "K"]], [["B", "C", "E", "F", "G", "H", "I", "L"], ["E", "G", "B", "C", "H", "F", "L", "I"]], [["B", "C", "E", "F", "G", "H", "I", "K"], ["E", "G", "B", "C", "H", "F", "I", "K"]], [["B", "C", "E", "F", "G", "H", "I", "J"], ["H", "G", "B", "C", "J", "F", "E", "I"]], [["B", "C", "D", "H", "I", "J", "K", "L"], ["H", "J", "B", "C", "I", "D", "L", "K"]], [["B", "C", "D", "G", "I", "J", "K", "L"], ["I", "G", "B", "C", "J", "D", "L", "K"]], [["B", "C", "D", "G", "H", "J", "K", "L"], ["H", "G", "B", "C", "J", "D", "L", "K"]], [["B", "C", "D", "G", "H", "I", "K", "L"], ["H", "G", "B", "C", "I", "D", "L", "K"]], [["B", "C", "D", "G", "H", "I", "J", "L"], ["H", "G", "B", "C", "J", "D", "L", "I"]], [["B", "C", "D", "G", "H", "I", "J", "K"], ["H", "G", "B", "C", "J", "D", "I", "K"]], [["B", "C", "D", "F", "I", "J", "K", "L"], ["C", "J", "B", "D", "I", "F", "L", "K"]], [["B", "C", "D", "F", "H", "J", "K", "L"], ["C", "J", "B", "D", "H", "F", "L", "K"]], [["B", "C", "D", "F", "H", "I", "K", "L"], ["C", "I", "B", "D", "H", "F", "L", "K"]], [["B", "C", "D", "F", "H", "I", "J", "L"], ["C", "J", "B", "D", "H", "F", "L", "I"]], [["B", "C", "D", "F", "H", "I", "J", "K"], ["C", "J", "B", "D", "H", "F", "I", "K"]], [["B", "C", "D", "F", "G", "J", "K", "L"], ["C", "G", "B", "D", "J", "F", "L", "K"]], [["B", "C", "D", "F", "G", "I", "K", "L"], ["C", "G", "B", "D", "I", "F", "L", "K"]], [["B", "C", "D", "F", "G", "I", "J", "L"], ["C", "G", "B", "D", "J", "F", "L", "I"]], [["B", "C", "D", "F", "G", "I", "J", "K"], ["C", "G", "B", "D", "J", "F", "I", "K"]], [["B", "C", "D", "F", "G", "H", "K", "L"], ["C", "G", "B", "D", "H", "F", "L", "K"]], [["B", "C", "D", "F", "G", "H", "J", "L"], ["C", "G", "B", "D", "H", "F", "L", "J"]], [["B", "C", "D", "F", "G", "H", "J", "K"], ["H", "G", "B", "C", "J", "F", "D", "K"]], [["B", "C", "D", "F", "G", "H", "I", "L"], ["C", "G", "B", "D", "H", "F", "L", "I"]], [["B", "C", "D", "F", "G", "H", "I", "K"], ["C", "G", "B", "D", "H", "F", "I", "K"]], [["B", "C", "D", "F", "G", "H", "I", "J"], ["H", "G", "B", "C", "J", "F", "D", "I"]], [["B", "C", "D", "E", "I", "J", "K", "L"], ["E", "J", "B", "C", "I", "D", "L", "K"]], [["B", "C", "D", "E", "H", "J", "K", "L"], ["E", "J", "B", "C", "H", "D", "L", "K"]], [["B", "C", "D", "E", "H", "I", "K", "L"], ["E", "I", "B", "C", "H", "D", "L", "K"]], [["B", "C", "D", "E", "H", "I", "J", "L"], ["E", "J", "B", "C", "H", "D", "L", "I"]], [["B", "C", "D", "E", "H", "I", "J", "K"], ["E", "J", "B", "C", "H", "D", "I", "K"]], [["B", "C", "D", "E", "G", "J", "K", "L"], ["E", "G", "B", "C", "J", "D", "L", "K"]], [["B", "C", "D", "E", "G", "I", "K", "L"], ["E", "G", "B", "C", "I", "D", "L", "K"]], [["B", "C", "D", "E", "G", "I", "J", "L"], ["E", "G", "B", "C", "J", "D", "L", "I"]], [["B", "C", "D", "E", "G", "I", "J", "K"], ["E", "G", "B", "C", "J", "D", "I", "K"]], [["B", "C", "D", "E", "G", "H", "K", "L"], ["E", "G", "B", "C", "H", "D", "L", "K"]], [["B", "C", "D", "E", "G", "H", "J", "L"], ["H", "G", "B", "C", "J", "D", "L", "E"]], [["B", "C", "D", "E", "G", "H", "J", "K"], ["H", "G", "B", "C", "J", "D", "E", "K"]], [["B", "C", "D", "E", "G", "H", "I", "L"], ["E", "G", "B", "C", "H", "D", "L", "I"]], [["B", "C", "D", "E", "G", "H", "I", "K"], ["E", "G", "B", "C", "H", "D", "I", "K"]], [["B", "C", "D", "E", "G", "H", "I", "J"], ["H", "G", "B", "C", "J", "D", "E", "I"]], [["B", "C", "D", "E", "F", "J", "K", "L"], ["C", "J", "B", "D", "E", "F", "L", "K"]], [["B", "C", "D", "E", "F", "I", "K", "L"], ["C", "E", "B", "D", "I", "F", "L", "K"]], [["B", "C", "D", "E", "F", "I", "J", "L"], ["C", "J", "B", "D", "E", "F", "L", "I"]], [["B", "C", "D", "E", "F", "I", "J", "K"], ["C", "J", "B", "D", "E", "F", "I", "K"]], [["B", "C", "D", "E", "F", "H", "K", "L"], ["C", "E", "B", "D", "H", "F", "L", "K"]], [["B", "C", "D", "E", "F", "H", "J", "L"], ["C", "J", "B", "D", "H", "F", "L", "E"]], [["B", "C", "D", "E", "F", "H", "J", "K"], ["C", "J", "B", "D", "H", "F", "E", "K"]], [["B", "C", "D", "E", "F", "H", "I", "L"], ["C", "E", "B", "D", "H", "F", "L", "I"]], [["B", "C", "D", "E", "F", "H", "I", "K"], ["C", "E", "B", "D", "H", "F", "I", "K"]], [["B", "C", "D", "E", "F", "H", "I", "J"], ["C", "J", "B", "D", "H", "F", "E", "I"]], [["B", "C", "D", "E", "F", "G", "K", "L"], ["C", "G", "B", "D", "E", "F", "L", "K"]], [["B", "C", "D", "E", "F", "G", "J", "L"], ["C", "G", "B", "D", "J", "F", "L", "E"]], [["B", "C", "D", "E", "F", "G", "J", "K"], ["C", "G", "B", "D", "J", "F", "E", "K"]], [["B", "C", "D", "E", "F", "G", "I", "L"], ["C", "G", "B", "D", "E", "F", "L", "I"]], [["B", "C", "D", "E", "F", "G", "I", "K"], ["C", "G", "B", "D", "E", "F", "I", "K"]], [["B", "C", "D", "E", "F", "G", "I", "J"], ["C", "G", "B", "D", "J", "F", "E", "I"]], [["B", "C", "D", "E", "F", "G", "H", "L"], ["C", "G", "B", "D", "H", "F", "L", "E"]], [["B", "C", "D", "E", "F", "G", "H", "K"], ["C", "G", "B", "D", "H", "F", "E", "K"]], [["B", "C", "D", "E", "F", "G", "H", "J"], ["H", "G", "B", "C", "J", "F", "D", "E"]], [["B", "C", "D", "E", "F", "G", "H", "I"], ["C", "G", "B", "D", "H", "F", "E", "I"]], [["A", "F", "G", "H", "I", "J", "K", "L"], ["H", "J", "I", "F", "A", "G", "L", "K"]], [["A", "E", "G", "H", "I", "J", "K", "L"], ["E", "J", "I", "A", "H", "G", "L", "K"]], [["A", "E", "F", "H", "I", "J", "K", "L"], ["E", "J", "I", "F", "A", "H", "L", "K"]], [["A", "E", "F", "G", "I", "J", "K", "L"], ["E", "J", "I", "F", "A", "G", "L", "K"]], [["A", "E", "F", "G", "H", "J", "K", "L"], ["E", "G", "J", "F", "A", "H", "L", "K"]], [["A", "E", "F", "G", "H", "I", "K", "L"], ["E", "G", "I", "F", "A", "H", "L", "K"]], [["A", "E", "F", "G", "H", "I", "J", "L"], ["E", "G", "J", "F", "A", "H", "L", "I"]], [["A", "E", "F", "G", "H", "I", "J", "K"], ["E", "G", "J", "F", "A", "H", "I", "K"]], [["A", "D", "G", "H", "I", "J", "K", "L"], ["H", "J", "I", "D", "A", "G", "L", "K"]], [["A", "D", "F", "H", "I", "J", "K", "L"], ["H", "J", "I", "D", "A", "F", "L", "K"]], [["A", "D", "F", "G", "I", "J", "K", "L"], ["I", "G", "J", "D", "A", "F", "L", "K"]], [["A", "D", "F", "G", "H", "J", "K", "L"], ["H", "G", "J", "D", "A", "F", "L", "K"]], [["A", "D", "F", "G", "H", "I", "K", "L"], ["H", "G", "I", "D", "A", "F", "L", "K"]], [["A", "D", "F", "G", "H", "I", "J", "L"], ["H", "G", "J", "D", "A", "F", "L", "I"]], [["A", "D", "F", "G", "H", "I", "J", "K"], ["H", "G", "J", "D", "A", "F", "I", "K"]], [["A", "D", "E", "H", "I", "J", "K", "L"], ["E", "J", "I", "D", "A", "H", "L", "K"]], [["A", "D", "E", "G", "I", "J", "K", "L"], ["E", "J", "I", "D", "A", "G", "L", "K"]], [["A", "D", "E", "G", "H", "J", "K", "L"], ["E", "G", "J", "D", "A", "H", "L", "K"]], [["A", "D", "E", "G", "H", "I", "K", "L"], ["E", "G", "I", "D", "A", "H", "L", "K"]], [["A", "D", "E", "G", "H", "I", "J", "L"], ["E", "G", "J", "D", "A", "H", "L", "I"]], [["A", "D", "E", "G", "H", "I", "J", "K"], ["E", "G", "J", "D", "A", "H", "I", "K"]], [["A", "D", "E", "F", "I", "J", "K", "L"], ["E", "J", "I", "D", "A", "F", "L", "K"]], [["A", "D", "E", "F", "H", "J", "K", "L"], ["H", "J", "E", "D", "A", "F", "L", "K"]], [["A", "D", "E", "F", "H", "I", "K", "L"], ["H", "E", "I", "D", "A", "F", "L", "K"]], [["A", "D", "E", "F", "H", "I", "J", "L"], ["H", "J", "E", "D", "A", "F", "L", "I"]], [["A", "D", "E", "F", "H", "I", "J", "K"], ["H", "J", "E", "D", "A", "F", "I", "K"]], [["A", "D", "E", "F", "G", "J", "K", "L"], ["E", "G", "J", "D", "A", "F", "L", "K"]], [["A", "D", "E", "F", "G", "I", "K", "L"], ["E", "G", "I", "D", "A", "F", "L", "K"]], [["A", "D", "E", "F", "G", "I", "J", "L"], ["E", "G", "J", "D", "A", "F", "L", "I"]], [["A", "D", "E", "F", "G", "I", "J", "K"], ["E", "G", "J", "D", "A", "F", "I", "K"]], [["A", "D", "E", "F", "G", "H", "K", "L"], ["H", "G", "E", "D", "A", "F", "L", "K"]], [["A", "D", "E", "F", "G", "H", "J", "L"], ["H", "G", "J", "D", "A", "F", "L", "E"]], [["A", "D", "E", "F", "G", "H", "J", "K"], ["H", "G", "J", "D", "A", "F", "E", "K"]], [["A", "D", "E", "F", "G", "H", "I", "L"], ["H", "G", "E", "D", "A", "F", "L", "I"]], [["A", "D", "E", "F", "G", "H", "I", "K"], ["H", "G", "E", "D", "A", "F", "I", "K"]], [["A", "D", "E", "F", "G", "H", "I", "J"], ["H", "G", "J", "D", "A", "F", "E", "I"]], [["A", "C", "G", "H", "I", "J", "K", "L"], ["H", "J", "I", "C", "A", "G", "L", "K"]], [["A", "C", "F", "H", "I", "J", "K", "L"], ["H", "J", "I", "C", "A", "F", "L", "K"]], [["A", "C", "F", "G", "I", "J", "K", "L"], ["I", "G", "J", "C", "A", "F", "L", "K"]], [["A", "C", "F", "G", "H", "J", "K", "L"], ["H", "G", "J", "C", "A", "F", "L", "K"]], [["A", "C", "F", "G", "H", "I", "K", "L"], ["H", "G", "I", "C", "A", "F", "L", "K"]], [["A", "C", "F", "G", "H", "I", "J", "L"], ["H", "G", "J", "C", "A", "F", "L", "I"]], [["A", "C", "F", "G", "H", "I", "J", "K"], ["H", "G", "J", "C", "A", "F", "I", "K"]], [["A", "C", "E", "H", "I", "J", "K", "L"], ["E", "J", "I", "C", "A", "H", "L", "K"]], [["A", "C", "E", "G", "I", "J", "K", "L"], ["E", "J", "I", "C", "A", "G", "L", "K"]], [["A", "C", "E", "G", "H", "J", "K", "L"], ["E", "G", "J", "C", "A", "H", "L", "K"]], [["A", "C", "E", "G", "H", "I", "K", "L"], ["E", "G", "I", "C", "A", "H", "L", "K"]], [["A", "C", "E", "G", "H", "I", "J", "L"], ["E", "G", "J", "C", "A", "H", "L", "I"]], [["A", "C", "E", "G", "H", "I", "J", "K"], ["E", "G", "J", "C", "A", "H", "I", "K"]], [["A", "C", "E", "F", "I", "J", "K", "L"], ["E", "J", "I", "C", "A", "F", "L", "K"]], [["A", "C", "E", "F", "H", "J", "K", "L"], ["H", "J", "E", "C", "A", "F", "L", "K"]], [["A", "C", "E", "F", "H", "I", "K", "L"], ["H", "E", "I", "C", "A", "F", "L", "K"]], [["A", "C", "E", "F", "H", "I", "J", "L"], ["H", "J", "E", "C", "A", "F", "L", "I"]], [["A", "C", "E", "F", "H", "I", "J", "K"], ["H", "J", "E", "C", "A", "F", "I", "K"]], [["A", "C", "E", "F", "G", "J", "K", "L"], ["E", "G", "J", "C", "A", "F", "L", "K"]], [["A", "C", "E", "F", "G", "I", "K", "L"], ["E", "G", "I", "C", "A", "F", "L", "K"]], [["A", "C", "E", "F", "G", "I", "J", "L"], ["E", "G", "J", "C", "A", "F", "L", "I"]], [["A", "C", "E", "F", "G", "I", "J", "K"], ["E", "G", "J", "C", "A", "F", "I", "K"]], [["A", "C", "E", "F", "G", "H", "K", "L"], ["H", "G", "E", "C", "A", "F", "L", "K"]], [["A", "C", "E", "F", "G", "H", "J", "L"], ["H", "G", "J", "C", "A", "F", "L", "E"]], [["A", "C", "E", "F", "G", "H", "J", "K"], ["H", "G", "J", "C", "A", "F", "E", "K"]], [["A", "C", "E", "F", "G", "H", "I", "L"], ["H", "G", "E", "C", "A", "F", "L", "I"]], [["A", "C", "E", "F", "G", "H", "I", "K"], ["H", "G", "E", "C", "A", "F", "I", "K"]], [["A", "C", "E", "F", "G", "H", "I", "J"], ["H", "G", "J", "C", "A", "F", "E", "I"]], [["A", "C", "D", "H", "I", "J", "K", "L"], ["H", "J", "I", "C", "A", "D", "L", "K"]], [["A", "C", "D", "G", "I", "J", "K", "L"], ["I", "G", "J", "C", "A", "D", "L", "K"]], [["A", "C", "D", "G", "H", "J", "K", "L"], ["H", "G", "J", "C", "A", "D", "L", "K"]], [["A", "C", "D", "G", "H", "I", "K", "L"], ["H", "G", "I", "C", "A", "D", "L", "K"]], [["A", "C", "D", "G", "H", "I", "J", "L"], ["H", "G", "J", "C", "A", "D", "L", "I"]], [["A", "C", "D", "G", "H", "I", "J", "K"], ["H", "G", "J", "C", "A", "D", "I", "K"]], [["A", "C", "D", "F", "I", "J", "K", "L"], ["C", "J", "I", "D", "A", "F", "L", "K"]], [["A", "C", "D", "F", "H", "J", "K", "L"], ["H", "J", "F", "C", "A", "D", "L", "K"]], [["A", "C", "D", "F", "H", "I", "K", "L"], ["H", "F", "I", "C", "A", "D", "L", "K"]], [["A", "C", "D", "F", "H", "I", "J", "L"], ["H", "J", "F", "C", "A", "D", "L", "I"]], [["A", "C", "D", "F", "H", "I", "J", "K"], ["H", "J", "F", "C", "A", "D", "I", "K"]], [["A", "C", "D", "F", "G", "J", "K", "L"], ["C", "G", "J", "D", "A", "F", "L", "K"]], [["A", "C", "D", "F", "G", "I", "K", "L"], ["C", "G", "I", "D", "A", "F", "L", "K"]], [["A", "C", "D", "F", "G", "I", "J", "L"], ["C", "G", "J", "D", "A", "F", "L", "I"]], [["A", "C", "D", "F", "G", "I", "J", "K"], ["C", "G", "J", "D", "A", "F", "I", "K"]], [["A", "C", "D", "F", "G", "H", "K", "L"], ["H", "G", "F", "C", "A", "D", "L", "K"]], [["A", "C", "D", "F", "G", "H", "J", "L"], ["C", "G", "J", "D", "A", "F", "L", "H"]], [["A", "C", "D", "F", "G", "H", "J", "K"], ["H", "G", "J", "C", "A", "F", "D", "K"]], [["A", "C", "D", "F", "G", "H", "I", "L"], ["H", "G", "F", "C", "A", "D", "L", "I"]], [["A", "C", "D", "F", "G", "H", "I", "K"], ["H", "G", "F", "C", "A", "D", "I", "K"]], [["A", "C", "D", "F", "G", "H", "I", "J"], ["H", "G", "J", "C", "A", "F", "D", "I"]], [["A", "C", "D", "E", "I", "J", "K", "L"], ["E", "J", "I", "C", "A", "D", "L", "K"]], [["A", "C", "D", "E", "H", "J", "K", "L"], ["H", "J", "E", "C", "A", "D", "L", "K"]], [["A", "C", "D", "E", "H", "I", "K", "L"], ["H", "E", "I", "C", "A", "D", "L", "K"]], [["A", "C", "D", "E", "H", "I", "J", "L"], ["H", "J", "E", "C", "A", "D", "L", "I"]], [["A", "C", "D", "E", "H", "I", "J", "K"], ["H", "J", "E", "C", "A", "D", "I", "K"]], [["A", "C", "D", "E", "G", "J", "K", "L"], ["E", "G", "J", "C", "A", "D", "L", "K"]], [["A", "C", "D", "E", "G", "I", "K", "L"], ["E", "G", "I", "C", "A", "D", "L", "K"]], [["A", "C", "D", "E", "G", "I", "J", "L"], ["E", "G", "J", "C", "A", "D", "L", "I"]], [["A", "C", "D", "E", "G", "I", "J", "K"], ["E", "G", "J", "C", "A", "D", "I", "K"]], [["A", "C", "D", "E", "G", "H", "K", "L"], ["H", "G", "E", "C", "A", "D", "L", "K"]], [["A", "C", "D", "E", "G", "H", "J", "L"], ["H", "G", "J", "C", "A", "D", "L", "E"]], [["A", "C", "D", "E", "G", "H", "J", "K"], ["H", "G", "J", "C", "A", "D", "E", "K"]], [["A", "C", "D", "E", "G", "H", "I", "L"], ["H", "G", "E", "C", "A", "D", "L", "I"]], [["A", "C", "D", "E", "G", "H", "I", "K"], ["H", "G", "E", "C", "A", "D", "I", "K"]], [["A", "C", "D", "E", "G", "H", "I", "J"], ["H", "G", "J", "C", "A", "D", "E", "I"]], [["A", "C", "D", "E", "F", "J", "K", "L"], ["C", "J", "E", "D", "A", "F", "L", "K"]], [["A", "C", "D", "E", "F", "I", "K", "L"], ["C", "E", "I", "D", "A", "F", "L", "K"]], [["A", "C", "D", "E", "F", "I", "J", "L"], ["C", "J", "E", "D", "A", "F", "L", "I"]], [["A", "C", "D", "E", "F", "I", "J", "K"], ["C", "J", "E", "D", "A", "F", "I", "K"]], [["A", "C", "D", "E", "F", "H", "K", "L"], ["H", "E", "F", "C", "A", "D", "L", "K"]], [["A", "C", "D", "E", "F", "H", "J", "L"], ["H", "J", "F", "C", "A", "D", "L", "E"]], [["A", "C", "D", "E", "F", "H", "J", "K"], ["H", "J", "E", "C", "A", "F", "D", "K"]], [["A", "C", "D", "E", "F", "H", "I", "L"], ["H", "E", "F", "C", "A", "D", "L", "I"]], [["A", "C", "D", "E", "F", "H", "I", "K"], ["H", "E", "F", "C", "A", "D", "I", "K"]], [["A", "C", "D", "E", "F", "H", "I", "J"], ["H", "J", "E", "C", "A", "F", "D", "I"]], [["A", "C", "D", "E", "F", "G", "K", "L"], ["C", "G", "E", "D", "A", "F", "L", "K"]], [["A", "C", "D", "E", "F", "G", "J", "L"], ["C", "G", "J", "D", "A", "F", "L", "E"]], [["A", "C", "D", "E", "F", "G", "J", "K"], ["C", "G", "J", "D", "A", "F", "E", "K"]], [["A", "C", "D", "E", "F", "G", "I", "L"], ["C", "G", "E", "D", "A", "F", "L", "I"]], [["A", "C", "D", "E", "F", "G", "I", "K"], ["C", "G", "E", "D", "A", "F", "I", "K"]], [["A", "C", "D", "E", "F", "G", "I", "J"], ["C", "G", "J", "D", "A", "F", "E", "I"]], [["A", "C", "D", "E", "F", "G", "H", "L"], ["H", "G", "F", "C", "A", "D", "L", "E"]], [["A", "C", "D", "E", "F", "G", "H", "K"], ["H", "G", "E", "C", "A", "F", "D", "K"]], [["A", "C", "D", "E", "F", "G", "H", "J"], ["H", "G", "J", "C", "A", "F", "D", "E"]], [["A", "C", "D", "E", "F", "G", "H", "I"], ["H", "G", "E", "C", "A", "F", "D", "I"]], [["A", "B", "G", "H", "I", "J", "K", "L"], ["H", "J", "B", "A", "I", "G", "L", "K"]], [["A", "B", "F", "H", "I", "J", "K", "L"], ["H", "J", "B", "A", "I", "F", "L", "K"]], [["A", "B", "F", "G", "I", "J", "K", "L"], ["I", "J", "B", "F", "A", "G", "L", "K"]], [["A", "B", "F", "G", "H", "J", "K", "L"], ["H", "J", "B", "F", "A", "G", "L", "K"]], [["A", "B", "F", "G", "H", "I", "K", "L"], ["H", "G", "B", "A", "I", "F", "L", "K"]], [["A", "B", "F", "G", "H", "I", "J", "L"], ["H", "J", "B", "F", "A", "G", "L", "I"]], [["A", "B", "F", "G", "H", "I", "J", "K"], ["H", "J", "B", "F", "A", "G", "I", "K"]], [["A", "B", "E", "H", "I", "J", "K", "L"], ["E", "J", "B", "A", "I", "H", "L", "K"]], [["A", "B", "E", "G", "I", "J", "K", "L"], ["E", "J", "B", "A", "I", "G", "L", "K"]], [["A", "B", "E", "G", "H", "J", "K", "L"], ["E", "J", "B", "A", "H", "G", "L", "K"]], [["A", "B", "E", "G", "H", "I", "K", "L"], ["E", "G", "B", "A", "I", "H", "L", "K"]], [["A", "B", "E", "G", "H", "I", "J", "L"], ["E", "J", "B", "A", "H", "G", "L", "I"]], [["A", "B", "E", "G", "H", "I", "J", "K"], ["E", "J", "B", "A", "H", "G", "I", "K"]], [["A", "B", "E", "F", "I", "J", "K", "L"], ["E", "J", "B", "A", "I", "F", "L", "K"]], [["A", "B", "E", "F", "H", "J", "K", "L"], ["E", "J", "B", "F", "A", "H", "L", "K"]], [["A", "B", "E", "F", "H", "I", "K", "L"], ["E", "I", "B", "F", "A", "H", "L", "K"]], [["A", "B", "E", "F", "H", "I", "J", "L"], ["E", "J", "B", "F", "A", "H", "L", "I"]], [["A", "B", "E", "F", "H", "I", "J", "K"], ["E", "J", "B", "F", "A", "H", "I", "K"]], [["A", "B", "E", "F", "G", "J", "K", "L"], ["E", "J", "B", "F", "A", "G", "L", "K"]], [["A", "B", "E", "F", "G", "I", "K", "L"], ["E", "G", "B", "A", "I", "F", "L", "K"]], [["A", "B", "E", "F", "G", "I", "J", "L"], ["E", "J", "B", "F", "A", "G", "L", "I"]], [["A", "B", "E", "F", "G", "I", "J", "K"], ["E", "J", "B", "F", "A", "G", "I", "K"]], [["A", "B", "E", "F", "G", "H", "K", "L"], ["E", "G", "B", "F", "A", "H", "L", "K"]], [["A", "B", "E", "F", "G", "H", "J", "L"], ["H", "J", "B", "F", "A", "G", "L", "E"]], [["A", "B", "E", "F", "G", "H", "J", "K"], ["H", "J", "B", "F", "A", "G", "E", "K"]], [["A", "B", "E", "F", "G", "H", "I", "L"], ["E", "G", "B", "F", "A", "H", "L", "I"]], [["A", "B", "E", "F", "G", "H", "I", "K"], ["E", "G", "B", "F", "A", "H", "I", "K"]], [["A", "B", "E", "F", "G", "H", "I", "J"], ["H", "J", "B", "F", "A", "G", "E", "I"]], [["A", "B", "D", "H", "I", "J", "K", "L"], ["I", "J", "B", "D", "A", "H", "L", "K"]], [["A", "B", "D", "G", "I", "J", "K", "L"], ["I", "J", "B", "D", "A", "G", "L", "K"]], [["A", "B", "D", "G", "H", "J", "K", "L"], ["H", "J", "B", "D", "A", "G", "L", "K"]], [["A", "B", "D", "G", "H", "I", "K", "L"], ["I", "G", "B", "D", "A", "H", "L", "K"]], [["A", "B", "D", "G", "H", "I", "J", "L"], ["H", "J", "B", "D", "A", "G", "L", "I"]], [["A", "B", "D", "G", "H", "I", "J", "K"], ["H", "J", "B", "D", "A", "G", "I", "K"]], [["A", "B", "D", "F", "I", "J", "K", "L"], ["I", "J", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "F", "H", "J", "K", "L"], ["H", "J", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "F", "H", "I", "K", "L"], ["H", "I", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "F", "H", "I", "J", "L"], ["H", "J", "B", "D", "A", "F", "L", "I"]], [["A", "B", "D", "F", "H", "I", "J", "K"], ["H", "J", "B", "D", "A", "F", "I", "K"]], [["A", "B", "D", "F", "G", "J", "K", "L"], ["F", "J", "B", "D", "A", "G", "L", "K"]], [["A", "B", "D", "F", "G", "I", "K", "L"], ["I", "G", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "F", "G", "I", "J", "L"], ["F", "J", "B", "D", "A", "G", "L", "I"]], [["A", "B", "D", "F", "G", "I", "J", "K"], ["F", "J", "B", "D", "A", "G", "I", "K"]], [["A", "B", "D", "F", "G", "H", "K", "L"], ["H", "G", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "F", "G", "H", "J", "L"], ["H", "G", "B", "D", "A", "F", "L", "J"]], [["A", "B", "D", "F", "G", "H", "J", "K"], ["H", "G", "B", "D", "A", "F", "J", "K"]], [["A", "B", "D", "F", "G", "H", "I", "L"], ["H", "G", "B", "D", "A", "F", "L", "I"]], [["A", "B", "D", "F", "G", "H", "I", "K"], ["H", "G", "B", "D", "A", "F", "I", "K"]], [["A", "B", "D", "F", "G", "H", "I", "J"], ["H", "G", "B", "D", "A", "F", "I", "J"]], [["A", "B", "D", "E", "I", "J", "K", "L"], ["E", "J", "B", "A", "I", "D", "L", "K"]], [["A", "B", "D", "E", "H", "J", "K", "L"], ["E", "J", "B", "D", "A", "H", "L", "K"]], [["A", "B", "D", "E", "H", "I", "K", "L"], ["E", "I", "B", "D", "A", "H", "L", "K"]], [["A", "B", "D", "E", "H", "I", "J", "L"], ["E", "J", "B", "D", "A", "H", "L", "I"]], [["A", "B", "D", "E", "H", "I", "J", "K"], ["E", "J", "B", "D", "A", "H", "I", "K"]], [["A", "B", "D", "E", "G", "J", "K", "L"], ["E", "J", "B", "D", "A", "G", "L", "K"]], [["A", "B", "D", "E", "G", "I", "K", "L"], ["E", "G", "B", "A", "I", "D", "L", "K"]], [["A", "B", "D", "E", "G", "I", "J", "L"], ["E", "J", "B", "D", "A", "G", "L", "I"]], [["A", "B", "D", "E", "G", "I", "J", "K"], ["E", "J", "B", "D", "A", "G", "I", "K"]], [["A", "B", "D", "E", "G", "H", "K", "L"], ["E", "G", "B", "D", "A", "H", "L", "K"]], [["A", "B", "D", "E", "G", "H", "J", "L"], ["H", "J", "B", "D", "A", "G", "L", "E"]], [["A", "B", "D", "E", "G", "H", "J", "K"], ["H", "J", "B", "D", "A", "G", "E", "K"]], [["A", "B", "D", "E", "G", "H", "I", "L"], ["E", "G", "B", "D", "A", "H", "L", "I"]], [["A", "B", "D", "E", "G", "H", "I", "K"], ["E", "G", "B", "D", "A", "H", "I", "K"]], [["A", "B", "D", "E", "G", "H", "I", "J"], ["H", "J", "B", "D", "A", "G", "E", "I"]], [["A", "B", "D", "E", "F", "J", "K", "L"], ["E", "J", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "E", "F", "I", "K", "L"], ["E", "I", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "E", "F", "I", "J", "L"], ["E", "J", "B", "D", "A", "F", "L", "I"]], [["A", "B", "D", "E", "F", "I", "J", "K"], ["E", "J", "B", "D", "A", "F", "I", "K"]], [["A", "B", "D", "E", "F", "H", "K", "L"], ["H", "E", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "E", "F", "H", "J", "L"], ["H", "J", "B", "D", "A", "F", "L", "E"]], [["A", "B", "D", "E", "F", "H", "J", "K"], ["H", "J", "B", "D", "A", "F", "E", "K"]], [["A", "B", "D", "E", "F", "H", "I", "L"], ["H", "E", "B", "D", "A", "F", "L", "I"]], [["A", "B", "D", "E", "F", "H", "I", "K"], ["H", "E", "B", "D", "A", "F", "I", "K"]], [["A", "B", "D", "E", "F", "H", "I", "J"], ["H", "J", "B", "D", "A", "F", "E", "I"]], [["A", "B", "D", "E", "F", "G", "K", "L"], ["E", "G", "B", "D", "A", "F", "L", "K"]], [["A", "B", "D", "E", "F", "G", "J", "L"], ["E", "G", "B", "D", "A", "F", "L", "J"]], [["A", "B", "D", "E", "F", "G", "J", "K"], ["E", "G", "B", "D", "A", "F", "J", "K"]], [["A", "B", "D", "E", "F", "G", "I", "L"], ["E", "G", "B", "D", "A", "F", "L", "I"]], [["A", "B", "D", "E", "F", "G", "I", "K"], ["E", "G", "B", "D", "A", "F", "I", "K"]], [["A", "B", "D", "E", "F", "G", "I", "J"], ["E", "G", "B", "D", "A", "F", "I", "J"]], [["A", "B", "D", "E", "F", "G", "H", "L"], ["H", "G", "B", "D", "A", "F", "L", "E"]], [["A", "B", "D", "E", "F", "G", "H", "K"], ["H", "G", "B", "D", "A", "F", "E", "K"]], [["A", "B", "D", "E", "F", "G", "H", "J"], ["H", "G", "B", "D", "A", "F", "E", "J"]], [["A", "B", "D", "E", "F", "G", "H", "I"], ["H", "G", "B", "D", "A", "F", "E", "I"]], [["A", "B", "C", "H", "I", "J", "K", "L"], ["I", "J", "B", "C", "A", "H", "L", "K"]], [["A", "B", "C", "G", "I", "J", "K", "L"], ["I", "J", "B", "C", "A", "G", "L", "K"]], [["A", "B", "C", "G", "H", "J", "K", "L"], ["H", "J", "B", "C", "A", "G", "L", "K"]], [["A", "B", "C", "G", "H", "I", "K", "L"], ["I", "G", "B", "C", "A", "H", "L", "K"]], [["A", "B", "C", "G", "H", "I", "J", "L"], ["H", "J", "B", "C", "A", "G", "L", "I"]], [["A", "B", "C", "G", "H", "I", "J", "K"], ["H", "J", "B", "C", "A", "G", "I", "K"]], [["A", "B", "C", "F", "I", "J", "K", "L"], ["I", "J", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "F", "H", "J", "K", "L"], ["H", "J", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "F", "H", "I", "K", "L"], ["H", "I", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "F", "H", "I", "J", "L"], ["H", "J", "B", "C", "A", "F", "L", "I"]], [["A", "B", "C", "F", "H", "I", "J", "K"], ["H", "J", "B", "C", "A", "F", "I", "K"]], [["A", "B", "C", "F", "G", "J", "K", "L"], ["C", "J", "B", "F", "A", "G", "L", "K"]], [["A", "B", "C", "F", "G", "I", "K", "L"], ["I", "G", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "F", "G", "I", "J", "L"], ["C", "J", "B", "F", "A", "G", "L", "I"]], [["A", "B", "C", "F", "G", "I", "J", "K"], ["C", "J", "B", "F", "A", "G", "I", "K"]], [["A", "B", "C", "F", "G", "H", "K", "L"], ["H", "G", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "F", "G", "H", "J", "L"], ["H", "G", "B", "C", "A", "F", "L", "J"]], [["A", "B", "C", "F", "G", "H", "J", "K"], ["H", "G", "B", "C", "A", "F", "J", "K"]], [["A", "B", "C", "F", "G", "H", "I", "L"], ["H", "G", "B", "C", "A", "F", "L", "I"]], [["A", "B", "C", "F", "G", "H", "I", "K"], ["H", "G", "B", "C", "A", "F", "I", "K"]], [["A", "B", "C", "F", "G", "H", "I", "J"], ["H", "G", "B", "C", "A", "F", "I", "J"]], [["A", "B", "C", "E", "I", "J", "K", "L"], ["E", "J", "B", "A", "I", "C", "L", "K"]], [["A", "B", "C", "E", "H", "J", "K", "L"], ["E", "J", "B", "C", "A", "H", "L", "K"]], [["A", "B", "C", "E", "H", "I", "K", "L"], ["E", "I", "B", "C", "A", "H", "L", "K"]], [["A", "B", "C", "E", "H", "I", "J", "L"], ["E", "J", "B", "C", "A", "H", "L", "I"]], [["A", "B", "C", "E", "H", "I", "J", "K"], ["E", "J", "B", "C", "A", "H", "I", "K"]], [["A", "B", "C", "E", "G", "J", "K", "L"], ["E", "J", "B", "C", "A", "G", "L", "K"]], [["A", "B", "C", "E", "G", "I", "K", "L"], ["E", "G", "B", "A", "I", "C", "L", "K"]], [["A", "B", "C", "E", "G", "I", "J", "L"], ["E", "J", "B", "C", "A", "G", "L", "I"]], [["A", "B", "C", "E", "G", "I", "J", "K"], ["E", "J", "B", "C", "A", "G", "I", "K"]], [["A", "B", "C", "E", "G", "H", "K", "L"], ["E", "G", "B", "C", "A", "H", "L", "K"]], [["A", "B", "C", "E", "G", "H", "J", "L"], ["H", "J", "B", "C", "A", "G", "L", "E"]], [["A", "B", "C", "E", "G", "H", "J", "K"], ["H", "J", "B", "C", "A", "G", "E", "K"]], [["A", "B", "C", "E", "G", "H", "I", "L"], ["E", "G", "B", "C", "A", "H", "L", "I"]], [["A", "B", "C", "E", "G", "H", "I", "K"], ["E", "G", "B", "C", "A", "H", "I", "K"]], [["A", "B", "C", "E", "G", "H", "I", "J"], ["H", "J", "B", "C", "A", "G", "E", "I"]], [["A", "B", "C", "E", "F", "J", "K", "L"], ["E", "J", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "E", "F", "I", "K", "L"], ["E", "I", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "E", "F", "I", "J", "L"], ["E", "J", "B", "C", "A", "F", "L", "I"]], [["A", "B", "C", "E", "F", "I", "J", "K"], ["E", "J", "B", "C", "A", "F", "I", "K"]], [["A", "B", "C", "E", "F", "H", "K", "L"], ["H", "E", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "E", "F", "H", "J", "L"], ["H", "J", "B", "C", "A", "F", "L", "E"]], [["A", "B", "C", "E", "F", "H", "J", "K"], ["H", "J", "B", "C", "A", "F", "E", "K"]], [["A", "B", "C", "E", "F", "H", "I", "L"], ["H", "E", "B", "C", "A", "F", "L", "I"]], [["A", "B", "C", "E", "F", "H", "I", "K"], ["H", "E", "B", "C", "A", "F", "I", "K"]], [["A", "B", "C", "E", "F", "H", "I", "J"], ["H", "J", "B", "C", "A", "F", "E", "I"]], [["A", "B", "C", "E", "F", "G", "K", "L"], ["E", "G", "B", "C", "A", "F", "L", "K"]], [["A", "B", "C", "E", "F", "G", "J", "L"], ["E", "G", "B", "C", "A", "F", "L", "J"]], [["A", "B", "C", "E", "F", "G", "J", "K"], ["E", "G", "B", "C", "A", "F", "J", "K"]], [["A", "B", "C", "E", "F", "G", "I", "L"], ["E", "G", "B", "C", "A", "F", "L", "I"]], [["A", "B", "C", "E", "F", "G", "I", "K"], ["E", "G", "B", "C", "A", "F", "I", "K"]], [["A", "B", "C", "E", "F", "G", "I", "J"], ["E", "G", "B", "C", "A", "F", "I", "J"]], [["A", "B", "C", "E", "F", "G", "H", "L"], ["H", "G", "B", "C", "A", "F", "L", "E"]], [["A", "B", "C", "E", "F", "G", "H", "K"], ["H", "G", "B", "C", "A", "F", "E", "K"]], [["A", "B", "C", "E", "F", "G", "H", "J"], ["H", "G", "B", "C", "A", "F", "E", "J"]], [["A", "B", "C", "E", "F", "G", "H", "I"], ["H", "G", "B", "C", "A", "F", "E", "I"]], [["A", "B", "C", "D", "I", "J", "K", "L"], ["I", "J", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "H", "J", "K", "L"], ["H", "J", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "H", "I", "K", "L"], ["H", "I", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "H", "I", "J", "L"], ["H", "J", "B", "C", "A", "D", "L", "I"]], [["A", "B", "C", "D", "H", "I", "J", "K"], ["H", "J", "B", "C", "A", "D", "I", "K"]], [["A", "B", "C", "D", "G", "J", "K", "L"], ["C", "J", "B", "D", "A", "G", "L", "K"]], [["A", "B", "C", "D", "G", "I", "K", "L"], ["I", "G", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "G", "I", "J", "L"], ["C", "J", "B", "D", "A", "G", "L", "I"]], [["A", "B", "C", "D", "G", "I", "J", "K"], ["C", "J", "B", "D", "A", "G", "I", "K"]], [["A", "B", "C", "D", "G", "H", "K", "L"], ["H", "G", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "G", "H", "J", "L"], ["H", "G", "B", "C", "A", "D", "L", "J"]], [["A", "B", "C", "D", "G", "H", "J", "K"], ["H", "G", "B", "C", "A", "D", "J", "K"]], [["A", "B", "C", "D", "G", "H", "I", "L"], ["H", "G", "B", "C", "A", "D", "L", "I"]], [["A", "B", "C", "D", "G", "H", "I", "K"], ["H", "G", "B", "C", "A", "D", "I", "K"]], [["A", "B", "C", "D", "G", "H", "I", "J"], ["H", "G", "B", "C", "A", "D", "I", "J"]], [["A", "B", "C", "D", "F", "J", "K", "L"], ["C", "J", "B", "D", "A", "F", "L", "K"]], [["A", "B", "C", "D", "F", "I", "K", "L"], ["C", "I", "B", "D", "A", "F", "L", "K"]], [["A", "B", "C", "D", "F", "I", "J", "L"], ["C", "J", "B", "D", "A", "F", "L", "I"]], [["A", "B", "C", "D", "F", "I", "J", "K"], ["C", "J", "B", "D", "A", "F", "I", "K"]], [["A", "B", "C", "D", "F", "H", "K", "L"], ["H", "F", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "F", "H", "J", "L"], ["C", "J", "B", "D", "A", "F", "L", "H"]], [["A", "B", "C", "D", "F", "H", "J", "K"], ["H", "J", "B", "C", "A", "F", "D", "K"]], [["A", "B", "C", "D", "F", "H", "I", "L"], ["H", "F", "B", "C", "A", "D", "L", "I"]], [["A", "B", "C", "D", "F", "H", "I", "K"], ["H", "F", "B", "C", "A", "D", "I", "K"]], [["A", "B", "C", "D", "F", "H", "I", "J"], ["H", "J", "B", "C", "A", "F", "D", "I"]], [["A", "B", "C", "D", "F", "G", "K", "L"], ["C", "G", "B", "D", "A", "F", "L", "K"]], [["A", "B", "C", "D", "F", "G", "J", "L"], ["C", "G", "B", "D", "A", "F", "L", "J"]], [["A", "B", "C", "D", "F", "G", "J", "K"], ["C", "G", "B", "D", "A", "F", "J", "K"]], [["A", "B", "C", "D", "F", "G", "I", "L"], ["C", "G", "B", "D", "A", "F", "L", "I"]], [["A", "B", "C", "D", "F", "G", "I", "K"], ["C", "G", "B", "D", "A", "F", "I", "K"]], [["A", "B", "C", "D", "F", "G", "I", "J"], ["C", "G", "B", "D", "A", "F", "I", "J"]], [["A", "B", "C", "D", "F", "G", "H", "L"], ["C", "G", "B", "D", "A", "F", "L", "H"]], [["A", "B", "C", "D", "F", "G", "H", "K"], ["H", "G", "B", "C", "A", "F", "D", "K"]], [["A", "B", "C", "D", "F", "G", "H", "J"], ["H", "G", "B", "C", "A", "F", "D", "J"]], [["A", "B", "C", "D", "F", "G", "H", "I"], ["H", "G", "B", "C", "A", "F", "D", "I"]], [["A", "B", "C", "D", "E", "J", "K", "L"], ["E", "J", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "E", "I", "K", "L"], ["E", "I", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "E", "I", "J", "L"], ["E", "J", "B", "C", "A", "D", "L", "I"]], [["A", "B", "C", "D", "E", "I", "J", "K"], ["E", "J", "B", "C", "A", "D", "I", "K"]], [["A", "B", "C", "D", "E", "H", "K", "L"], ["H", "E", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "E", "H", "J", "L"], ["H", "J", "B", "C", "A", "D", "L", "E"]], [["A", "B", "C", "D", "E", "H", "J", "K"], ["H", "J", "B", "C", "A", "D", "E", "K"]], [["A", "B", "C", "D", "E", "H", "I", "L"], ["H", "E", "B", "C", "A", "D", "L", "I"]], [["A", "B", "C", "D", "E", "H", "I", "K"], ["H", "E", "B", "C", "A", "D", "I", "K"]], [["A", "B", "C", "D", "E", "H", "I", "J"], ["H", "J", "B", "C", "A", "D", "E", "I"]], [["A", "B", "C", "D", "E", "G", "K", "L"], ["E", "G", "B", "C", "A", "D", "L", "K"]], [["A", "B", "C", "D", "E", "G", "J", "L"], ["E", "G", "B", "C", "A", "D", "L", "J"]], [["A", "B", "C", "D", "E", "G", "J", "K"], ["E", "G", "B", "C", "A", "D", "J", "K"]], [["A", "B", "C", "D", "E", "G", "I", "L"], ["E", "G", "B", "C", "A", "D", "L", "I"]], [["A", "B", "C", "D", "E", "G", "I", "K"], ["E", "G", "B", "C", "A", "D", "I", "K"]], [["A", "B", "C", "D", "E", "G", "I", "J"], ["E", "G", "B", "C", "A", "D", "I", "J"]], [["A", "B", "C", "D", "E", "G", "H", "L"], ["H", "G", "B", "C", "A", "D", "L", "E"]], [["A", "B", "C", "D", "E", "G", "H", "K"], ["H", "G", "B", "C", "A", "D", "E", "K"]], [["A", "B", "C", "D", "E", "G", "H", "J"], ["H", "G", "B", "C", "A", "D", "E", "J"]], [["A", "B", "C", "D", "E", "G", "H", "I"], ["H", "G", "B", "C", "A", "D", "E", "I"]], [["A", "B", "C", "D", "E", "F", "K", "L"], ["C", "E", "B", "D", "A", "F", "L", "K"]], [["A", "B", "C", "D", "E", "F", "J", "L"], ["C", "J", "B", "D", "A", "F", "L", "E"]], [["A", "B", "C", "D", "E", "F", "J", "K"], ["C", "J", "B", "D", "A", "F", "E", "K"]], [["A", "B", "C", "D", "E", "F", "I", "L"], ["C", "E", "B", "D", "A", "F", "L", "I"]], [["A", "B", "C", "D", "E", "F", "I", "K"], ["C", "E", "B", "D", "A", "F", "I", "K"]], [["A", "B", "C", "D", "E", "F", "I", "J"], ["C", "J", "B", "D", "A", "F", "E", "I"]], [["A", "B", "C", "D", "E", "F", "H", "L"], ["H", "F", "B", "C", "A", "D", "L", "E"]], [["A", "B", "C", "D", "E", "F", "H", "K"], ["H", "E", "B", "C", "A", "F", "D", "K"]], [["A", "B", "C", "D", "E", "F", "H", "J"], ["H", "J", "B", "C", "A", "F", "D", "E"]], [["A", "B", "C", "D", "E", "F", "H", "I"], ["H", "E", "B", "C", "A", "F", "D", "I"]], [["A", "B", "C", "D", "E", "F", "G", "L"], ["C", "G", "B", "D", "A", "F", "L", "E"]], [["A", "B", "C", "D", "E", "F", "G", "K"], ["C", "G", "B", "D", "A", "F", "E", "K"]], [["A", "B", "C", "D", "E", "F", "G", "J"], ["C", "G", "B", "D", "A", "F", "E", "J"]], [["A", "B", "C", "D", "E", "F", "G", "I"], ["C", "G", "B", "D", "A", "F", "E", "I"]], [["A", "B", "C", "D", "E", "F", "G", "H"], ["H", "G", "B", "C", "A", "F", "D", "E"]]]};
+const APPDATA = {"teams":{"MEX":["México","A"],"RSA":["Sudáfrica","A"],"KOR":["Corea del Sur","A"],"CZE":["Chequia","A"],"CAN":["Canadá","B"],"BIH":["Bosnia-Herz.","B"],"QAT":["Catar","B"],"SUI":["Suiza","B"],"BRA":["Brasil","C"],"MAR":["Marruecos","C"],"HAI":["Haití","C"],"SCO":["Escocia","C"],"USA":["Estados Unidos","D"],"PAR":["Paraguay","D"],"AUS":["Australia","D"],"TUR":["Turquía","D"],"GER":["Alemania","E"],"CUW":["Curazao","E"],"CIV":["Costa de Marfil","E"],"ECU":["Ecuador","E"],"NED":["Países Bajos","F"],"JPN":["Japón","F"],"SWE":["Suecia","F"],"TUN":["Túnez","F"],"BEL":["Bélgica","G"],"EGY":["Egipto","G"],"IRN":["RI de Irán","G"],"NZL":["Nueva Zelanda","G"],"ESP":["España","H"],"CPV":["Cabo Verde","H"],"KSA":["Arabia Saudita","H"],"URU":["Uruguay","H"],"FRA":["Francia","I"],"SEN":["Senegal","I"],"IRQ":["Irak","I"],"NOR":["Noruega","I"],"ARG":["Argentina","J"],"ALG":["Argelia","J"],"AUT":["Austria","J"],"JOR":["Jordania","J"],"POR":["Portugal","K"],"COD":["RD Congo","K"],"UZB":["Uzbekistán","K"],"COL":["Colombia","K"],"ENG":["Inglaterra","L"],"CRO":["Croacia","L"],"GHA":["Ghana","L"],"PAN":["Panamá","L"]},"groups":{"A":["MEX","RSA","KOR","CZE"],"B":["CAN","BIH","QAT","SUI"],"C":["BRA","MAR","HAI","SCO"],"D":["USA","PAR","AUS","TUR"],"E":["GER","CUW","CIV","ECU"],"F":["NED","JPN","SWE","TUN"],"G":["BEL","EGY","IRN","NZL"],"H":["ESP","CPV","KSA","URU"],"I":["FRA","SEN","IRQ","NOR"],"J":["ARG","ALG","AUT","JOR"],"K":["POR","COD","UZB","COL"],"L":["ENG","CRO","GHA","PAN"]},"matches":[{"id":"g1","group":"A","md":1,"home":"MEX","away":"RSA","hg":2,"ag":0},{"id":"g2","group":"A","md":1,"home":"KOR","away":"CZE","hg":2,"ag":1},{"id":"g3","group":"B","md":1,"home":"CAN","away":"BIH","hg":1,"ag":1},{"id":"g4","group":"D","md":1,"home":"USA","away":"PAR","hg":4,"ag":1},{"id":"g5","group":"B","md":1,"home":"QAT","away":"SUI","hg":1,"ag":1},{"id":"g6","group":"C","md":1,"home":"BRA","away":"MAR","hg":1,"ag":1},{"id":"g7","group":"C","md":1,"home":"HAI","away":"SCO","hg":0,"ag":1},{"id":"g8","group":"D","md":1,"home":"AUS","away":"TUR","hg":2,"ag":0},{"id":"g9","group":"E","md":1,"home":"GER","away":"CUW","hg":7,"ag":1},{"id":"g10","group":"F","md":1,"home":"NED","away":"JPN","hg":2,"ag":2},{"id":"g11","group":"E","md":1,"home":"CIV","away":"ECU","hg":1,"ag":0},{"id":"g12","group":"F","md":1,"home":"SWE","away":"TUN","hg":5,"ag":1},{"id":"g13","group":"H","md":1,"home":"ESP","away":"CPV","hg":0,"ag":0},{"id":"g14","group":"G","md":1,"home":"BEL","away":"EGY","hg":1,"ag":1},{"id":"g15","group":"H","md":1,"home":"KSA","away":"URU","hg":1,"ag":1},{"id":"g16","group":"G","md":1,"home":"IRN","away":"NZL","hg":2,"ag":2},{"id":"g17","group":"I","md":1,"home":"FRA","away":"SEN","hg":3,"ag":1},{"id":"g18","group":"I","md":1,"home":"IRQ","away":"NOR","hg":1,"ag":4},{"id":"g19","group":"J","md":1,"home":"ARG","away":"ALG","hg":3,"ag":0},{"id":"g20","group":"J","md":1,"home":"AUT","away":"JOR","hg":3,"ag":1},{"id":"g21","group":"K","md":1,"home":"POR","away":"COD","hg":1,"ag":1},{"id":"g22","group":"L","md":1,"home":"ENG","away":"CRO","hg":4,"ag":2},{"id":"g23","group":"L","md":1,"home":"GHA","away":"PAN","hg":1,"ag":0},{"id":"g24","group":"K","md":1,"home":"UZB","away":"COL","hg":1,"ag":3},{"id":"g25","group":"A","md":2,"home":"CZE","away":"RSA","hg":1,"ag":1},{"id":"g26","group":"B","md":2,"home":"SUI","away":"BIH","hg":4,"ag":1},{"id":"g27","group":"B","md":2,"home":"CAN","away":"QAT","hg":6,"ag":0},{"id":"g28","group":"A","md":2,"home":"MEX","away":"KOR","hg":1,"ag":0},{"id":"g29","group":"D","md":2,"home":"USA","away":"AUS","hg":2,"ag":0},{"id":"g30","group":"C","md":2,"home":"SCO","away":"MAR","hg":0,"ag":1},{"id":"g31","group":"C","md":2,"home":"BRA","away":"HAI","hg":3,"ag":0},{"id":"g32","group":"D","md":2,"home":"TUR","away":"PAR","hg":0,"ag":1},{"id":"g33","group":"F","md":2,"home":"NED","away":"SWE","hg":5,"ag":1},{"id":"g34","group":"E","md":2,"home":"GER","away":"CIV","hg":2,"ag":1},{"id":"g35","group":"E","md":2,"home":"ECU","away":"CUW","hg":0,"ag":0},{"id":"g36","group":"F","md":2,"home":"TUN","away":"JPN","hg":0,"ag":4},{"id":"g37","group":"H","md":2,"home":"ESP","away":"KSA","hg":4,"ag":0},{"id":"g38","group":"G","md":2,"home":"BEL","away":"IRN","hg":0,"ag":0},{"id":"g39","group":"H","md":2,"home":"URU","away":"CPV","hg":2,"ag":2},{"id":"g40","group":"G","md":2,"home":"NZL","away":"EGY","hg":1,"ag":3},{"id":"g41","group":"J","md":2,"home":"ARG","away":"AUT","hg":2,"ag":0},{"id":"g42","group":"I","md":2,"home":"FRA","away":"IRQ","hg":3,"ag":0},{"id":"g43","group":"I","md":2,"home":"NOR","away":"SEN","hg":3,"ag":2},{"id":"g44","group":"J","md":2,"home":"JOR","away":"ALG","hg":1,"ag":2},{"id":"g45","group":"K","md":2,"home":"POR","away":"UZB","hg":5,"ag":0},{"id":"g46","group":"L","md":2,"home":"ENG","away":"GHA","hg":0,"ag":0},{"id":"g47","group":"L","md":2,"home":"PAN","away":"CRO","hg":0,"ag":1},{"id":"g48","group":"K","md":2,"home":"COL","away":"COD","hg":1,"ag":0},{"id":"g49","group":"B","md":3,"home":"SUI","away":"CAN","hg":3,"ag":1},{"id":"g50","group":"B","md":3,"home":"BIH","away":"QAT","hg":3,"ag":1},{"id":"g51","group":"C","md":3,"home":"SCO","away":"BRA","hg":0,"ag":3},{"id":"g52","group":"C","md":3,"home":"MAR","away":"HAI","hg":4,"ag":2},{"id":"g53","group":"A","md":3,"home":"CZE","away":"MEX","hg":0,"ag":3},{"id":"g54","group":"A","md":3,"home":"RSA","away":"KOR","hg":1,"ag":0},{"id":"g55","group":"E","md":3,"home":"CUW","away":"CIV","hg":0,"ag":2},{"id":"g56","group":"E","md":3,"home":"ECU","away":"GER","hg":2,"ag":1},{"id":"g57","group":"F","md":3,"home":"JPN","away":"SWE","hg":1,"ag":1},{"id":"g58","group":"F","md":3,"home":"TUN","away":"NED","hg":1,"ag":3},{"id":"g59","group":"D","md":3,"home":"TUR","away":"USA","hg":3,"ag":2},{"id":"g60","group":"D","md":3,"home":"PAR","away":"AUS","hg":0,"ag":0},{"id":"g61","group":"I","md":3,"home":"NOR","away":"FRA","hg":1,"ag":3},{"id":"g62","group":"I","md":3,"home":"SEN","away":"IRQ","hg":4,"ag":0},{"id":"g63","group":"H","md":3,"home":"CPV","away":"KSA","hg":null,"ag":null},{"id":"g64","group":"H","md":3,"home":"URU","away":"ESP","hg":null,"ag":null},{"id":"g65","group":"G","md":3,"home":"EGY","away":"IRN","hg":null,"ag":null},{"id":"g66","group":"G","md":3,"home":"NZL","away":"BEL","hg":null,"ag":null},{"id":"g67","group":"L","md":3,"home":"PAN","away":"ENG","hg":null,"ag":null},{"id":"g68","group":"L","md":3,"home":"CRO","away":"GHA","hg":null,"ag":null},{"id":"g69","group":"K","md":3,"home":"COL","away":"POR","hg":null,"ag":null},{"id":"g70","group":"K","md":3,"home":"COD","away":"UZB","hg":null,"ag":null},{"id":"g71","group":"J","md":3,"home":"ALG","away":"AUT","hg":null,"ag":null},{"id":"g72","group":"J","md":3,"home":"JOR","away":"ARG","hg":null,"ag":null}],"combo":[[["E","F","G","H","I","J","K","L"],["E","J","I","F","H","G","L","K"]],[["D","F","G","H","I","J","K","L"],["H","G","I","D","J","F","L","K"]],[["D","E","G","H","I","J","K","L"],["E","J","I","D","H","G","L","K"]],[["D","E","F","H","I","J","K","L"],["E","J","I","D","H","F","L","K"]],[["D","E","F","G","I","J","K","L"],["E","G","I","D","J","F","L","K"]],[["D","E","F","G","H","J","K","L"],["E","G","J","D","H","F","L","K"]],[["D","E","F","G","H","I","K","L"],["E","G","I","D","H","F","L","K"]],[["D","E","F","G","H","I","J","L"],["E","G","J","D","H","F","L","I"]],[["D","E","F","G","H","I","J","K"],["E","G","J","D","H","F","I","K"]],[["C","F","G","H","I","J","K","L"],["H","G","I","C","J","F","L","K"]],[["C","E","G","H","I","J","K","L"],["E","J","I","C","H","G","L","K"]],[["C","E","F","H","I","J","K","L"],["E","J","I","C","H","F","L","K"]],[["C","E","F","G","I","J","K","L"],["E","G","I","C","J","F","L","K"]],[["C","E","F","G","H","J","K","L"],["E","G","J","C","H","F","L","K"]],[["C","E","F","G","H","I","K","L"],["E","G","I","C","H","F","L","K"]],[["C","E","F","G","H","I","J","L"],["E","G","J","C","H","F","L","I"]],[["C","E","F","G","H","I","J","K"],["E","G","J","C","H","F","I","K"]],[["C","D","G","H","I","J","K","L"],["H","G","I","C","J","D","L","K"]],[["C","D","F","H","I","J","K","L"],["C","J","I","D","H","F","L","K"]],[["C","D","F","G","I","J","K","L"],["C","G","I","D","J","F","L","K"]],[["C","D","F","G","H","J","K","L"],["C","G","J","D","H","F","L","K"]],[["C","D","F","G","H","I","K","L"],["C","G","I","D","H","F","L","K"]],[["C","D","F","G","H","I","J","L"],["C","G","J","D","H","F","L","I"]],[["C","D","F","G","H","I","J","K"],["C","G","J","D","H","F","I","K"]],[["C","D","E","H","I","J","K","L"],["E","J","I","C","H","D","L","K"]],[["C","D","E","G","I","J","K","L"],["E","G","I","C","J","D","L","K"]],[["C","D","E","G","H","J","K","L"],["E","G","J","C","H","D","L","K"]],[["C","D","E","G","H","I","K","L"],["E","G","I","C","H","D","L","K"]],[["C","D","E","G","H","I","J","L"],["E","G","J","C","H","D","L","I"]],[["C","D","E","G","H","I","J","K"],["E","G","J","C","H","D","I","K"]],[["C","D","E","F","I","J","K","L"],["C","J","E","D","I","F","L","K"]],[["C","D","E","F","H","J","K","L"],["C","J","E","D","H","F","L","K"]],[["C","D","E","F","H","I","K","L"],["C","E","I","D","H","F","L","K"]],[["C","D","E","F","H","I","J","L"],["C","J","E","D","H","F","L","I"]],[["C","D","E","F","H","I","J","K"],["C","J","E","D","H","F","I","K"]],[["C","D","E","F","G","J","K","L"],["C","G","E","D","J","F","L","K"]],[["C","D","E","F","G","I","K","L"],["C","G","E","D","I","F","L","K"]],[["C","D","E","F","G","I","J","L"],["C","G","E","D","J","F","L","I"]],[["C","D","E","F","G","I","J","K"],["C","G","E","D","J","F","I","K"]],[["C","D","E","F","G","H","K","L"],["C","G","E","D","H","F","L","K"]],[["C","D","E","F","G","H","J","L"],["C","G","J","D","H","F","L","E"]],[["C","D","E","F","G","H","J","K"],["C","G","J","D","H","F","E","K"]],[["C","D","E","F","G","H","I","L"],["C","G","E","D","H","F","L","I"]],[["C","D","E","F","G","H","I","K"],["C","G","E","D","H","F","I","K"]],[["C","D","E","F","G","H","I","J"],["C","G","J","D","H","F","E","I"]],[["B","F","G","H","I","J","K","L"],["H","J","B","F","I","G","L","K"]],[["B","E","G","H","I","J","K","L"],["E","J","I","B","H","G","L","K"]],[["B","E","F","H","I","J","K","L"],["E","J","B","F","I","H","L","K"]],[["B","E","F","G","I","J","K","L"],["E","J","B","F","I","G","L","K"]],[["B","E","F","G","H","J","K","L"],["E","J","B","F","H","G","L","K"]],[["B","E","F","G","H","I","K","L"],["E","G","B","F","I","H","L","K"]],[["B","E","F","G","H","I","J","L"],["E","J","B","F","H","G","L","I"]],[["B","E","F","G","H","I","J","K"],["E","J","B","F","H","G","I","K"]],[["B","D","G","H","I","J","K","L"],["H","J","B","D","I","G","L","K"]],[["B","D","F","H","I","J","K","L"],["H","J","B","D","I","F","L","K"]],[["B","D","F","G","I","J","K","L"],["I","G","B","D","J","F","L","K"]],[["B","D","F","G","H","J","K","L"],["H","G","B","D","J","F","L","K"]],[["B","D","F","G","H","I","K","L"],["H","G","B","D","I","F","L","K"]],[["B","D","F","G","H","I","J","L"],["H","G","B","D","J","F","L","I"]],[["B","D","F","G","H","I","J","K"],["H","G","B","D","J","F","I","K"]],[["B","D","E","H","I","J","K","L"],["E","J","B","D","I","H","L","K"]],[["B","D","E","G","I","J","K","L"],["E","J","B","D","I","G","L","K"]],[["B","D","E","G","H","J","K","L"],["E","J","B","D","H","G","L","K"]],[["B","D","E","G","H","I","K","L"],["E","G","B","D","I","H","L","K"]],[["B","D","E","G","H","I","J","L"],["E","J","B","D","H","G","L","I"]],[["B","D","E","G","H","I","J","K"],["E","J","B","D","H","G","I","K"]],[["B","D","E","F","I","J","K","L"],["E","J","B","D","I","F","L","K"]],[["B","D","E","F","H","J","K","L"],["E","J","B","D","H","F","L","K"]],[["B","D","E","F","H","I","K","L"],["E","I","B","D","H","F","L","K"]],[["B","D","E","F","H","I","J","L"],["E","J","B","D","H","F","L","I"]],[["B","D","E","F","H","I","J","K"],["E","J","B","D","H","F","I","K"]],[["B","D","E","F","G","J","K","L"],["E","G","B","D","J","F","L","K"]],[["B","D","E","F","G","I","K","L"],["E","G","B","D","I","F","L","K"]],[["B","D","E","F","G","I","J","L"],["E","G","B","D","J","F","L","I"]],[["B","D","E","F","G","I","J","K"],["E","G","B","D","J","F","I","K"]],[["B","D","E","F","G","H","K","L"],["E","G","B","D","H","F","L","K"]],[["B","D","E","F","G","H","J","L"],["H","G","B","D","J","F","L","E"]],[["B","D","E","F","G","H","J","K"],["H","G","B","D","J","F","E","K"]],[["B","D","E","F","G","H","I","L"],["E","G","B","D","H","F","L","I"]],[["B","D","E","F","G","H","I","K"],["E","G","B","D","H","F","I","K"]],[["B","D","E","F","G","H","I","J"],["H","G","B","D","J","F","E","I"]],[["B","C","G","H","I","J","K","L"],["H","J","B","C","I","G","L","K"]],[["B","C","F","H","I","J","K","L"],["H","J","B","C","I","F","L","K"]],[["B","C","F","G","I","J","K","L"],["I","G","B","C","J","F","L","K"]],[["B","C","F","G","H","J","K","L"],["H","G","B","C","J","F","L","K"]],[["B","C","F","G","H","I","K","L"],["H","G","B","C","I","F","L","K"]],[["B","C","F","G","H","I","J","L"],["H","G","B","C","J","F","L","I"]],[["B","C","F","G","H","I","J","K"],["H","G","B","C","J","F","I","K"]],[["B","C","E","H","I","J","K","L"],["E","J","B","C","I","H","L","K"]],[["B","C","E","G","I","J","K","L"],["E","J","B","C","I","G","L","K"]],[["B","C","E","G","H","J","K","L"],["E","J","B","C","H","G","L","K"]],[["B","C","E","G","H","I","K","L"],["E","G","B","C","I","H","L","K"]],[["B","C","E","G","H","I","J","L"],["E","J","B","C","H","G","L","I"]],[["B","C","E","G","H","I","J","K"],["E","J","B","C","H","G","I","K"]],[["B","C","E","F","I","J","K","L"],["E","J","B","C","I","F","L","K"]],[["B","C","E","F","H","J","K","L"],["E","J","B","C","H","F","L","K"]],[["B","C","E","F","H","I","K","L"],["E","I","B","C","H","F","L","K"]],[["B","C","E","F","H","I","J","L"],["E","J","B","C","H","F","L","I"]],[["B","C","E","F","H","I","J","K"],["E","J","B","C","H","F","I","K"]],[["B","C","E","F","G","J","K","L"],["E","G","B","C","J","F","L","K"]],[["B","C","E","F","G","I","K","L"],["E","G","B","C","I","F","L","K"]],[["B","C","E","F","G","I","J","L"],["E","G","B","C","J","F","L","I"]],[["B","C","E","F","G","I","J","K"],["E","G","B","C","J","F","I","K"]],[["B","C","E","F","G","H","K","L"],["E","G","B","C","H","F","L","K"]],[["B","C","E","F","G","H","J","L"],["H","G","B","C","J","F","L","E"]],[["B","C","E","F","G","H","J","K"],["H","G","B","C","J","F","E","K"]],[["B","C","E","F","G","H","I","L"],["E","G","B","C","H","F","L","I"]],[["B","C","E","F","G","H","I","K"],["E","G","B","C","H","F","I","K"]],[["B","C","E","F","G","H","I","J"],["H","G","B","C","J","F","E","I"]],[["B","C","D","H","I","J","K","L"],["H","J","B","C","I","D","L","K"]],[["B","C","D","G","I","J","K","L"],["I","G","B","C","J","D","L","K"]],[["B","C","D","G","H","J","K","L"],["H","G","B","C","J","D","L","K"]],[["B","C","D","G","H","I","K","L"],["H","G","B","C","I","D","L","K"]],[["B","C","D","G","H","I","J","L"],["H","G","B","C","J","D","L","I"]],[["B","C","D","G","H","I","J","K"],["H","G","B","C","J","D","I","K"]],[["B","C","D","F","I","J","K","L"],["C","J","B","D","I","F","L","K"]],[["B","C","D","F","H","J","K","L"],["C","J","B","D","H","F","L","K"]],[["B","C","D","F","H","I","K","L"],["C","I","B","D","H","F","L","K"]],[["B","C","D","F","H","I","J","L"],["C","J","B","D","H","F","L","I"]],[["B","C","D","F","H","I","J","K"],["C","J","B","D","H","F","I","K"]],[["B","C","D","F","G","J","K","L"],["C","G","B","D","J","F","L","K"]],[["B","C","D","F","G","I","K","L"],["C","G","B","D","I","F","L","K"]],[["B","C","D","F","G","I","J","L"],["C","G","B","D","J","F","L","I"]],[["B","C","D","F","G","I","J","K"],["C","G","B","D","J","F","I","K"]],[["B","C","D","F","G","H","K","L"],["C","G","B","D","H","F","L","K"]],[["B","C","D","F","G","H","J","L"],["C","G","B","D","H","F","L","J"]],[["B","C","D","F","G","H","J","K"],["H","G","B","C","J","F","D","K"]],[["B","C","D","F","G","H","I","L"],["C","G","B","D","H","F","L","I"]],[["B","C","D","F","G","H","I","K"],["C","G","B","D","H","F","I","K"]],[["B","C","D","F","G","H","I","J"],["H","G","B","C","J","F","D","I"]],[["B","C","D","E","I","J","K","L"],["E","J","B","C","I","D","L","K"]],[["B","C","D","E","H","J","K","L"],["E","J","B","C","H","D","L","K"]],[["B","C","D","E","H","I","K","L"],["E","I","B","C","H","D","L","K"]],[["B","C","D","E","H","I","J","L"],["E","J","B","C","H","D","L","I"]],[["B","C","D","E","H","I","J","K"],["E","J","B","C","H","D","I","K"]],[["B","C","D","E","G","J","K","L"],["E","G","B","C","J","D","L","K"]],[["B","C","D","E","G","I","K","L"],["E","G","B","C","I","D","L","K"]],[["B","C","D","E","G","I","J","L"],["E","G","B","C","J","D","L","I"]],[["B","C","D","E","G","I","J","K"],["E","G","B","C","J","D","I","K"]],[["B","C","D","E","G","H","K","L"],["E","G","B","C","H","D","L","K"]],[["B","C","D","E","G","H","J","L"],["H","G","B","C","J","D","L","E"]],[["B","C","D","E","G","H","J","K"],["H","G","B","C","J","D","E","K"]],[["B","C","D","E","G","H","I","L"],["E","G","B","C","H","D","L","I"]],[["B","C","D","E","G","H","I","K"],["E","G","B","C","H","D","I","K"]],[["B","C","D","E","G","H","I","J"],["H","G","B","C","J","D","E","I"]],[["B","C","D","E","F","J","K","L"],["C","J","B","D","E","F","L","K"]],[["B","C","D","E","F","I","K","L"],["C","E","B","D","I","F","L","K"]],[["B","C","D","E","F","I","J","L"],["C","J","B","D","E","F","L","I"]],[["B","C","D","E","F","I","J","K"],["C","J","B","D","E","F","I","K"]],[["B","C","D","E","F","H","K","L"],["C","E","B","D","H","F","L","K"]],[["B","C","D","E","F","H","J","L"],["C","J","B","D","H","F","L","E"]],[["B","C","D","E","F","H","J","K"],["C","J","B","D","H","F","E","K"]],[["B","C","D","E","F","H","I","L"],["C","E","B","D","H","F","L","I"]],[["B","C","D","E","F","H","I","K"],["C","E","B","D","H","F","I","K"]],[["B","C","D","E","F","H","I","J"],["C","J","B","D","H","F","E","I"]],[["B","C","D","E","F","G","K","L"],["C","G","B","D","E","F","L","K"]],[["B","C","D","E","F","G","J","L"],["C","G","B","D","J","F","L","E"]],[["B","C","D","E","F","G","J","K"],["C","G","B","D","J","F","E","K"]],[["B","C","D","E","F","G","I","L"],["C","G","B","D","E","F","L","I"]],[["B","C","D","E","F","G","I","K"],["C","G","B","D","E","F","I","K"]],[["B","C","D","E","F","G","I","J"],["C","G","B","D","J","F","E","I"]],[["B","C","D","E","F","G","H","L"],["C","G","B","D","H","F","L","E"]],[["B","C","D","E","F","G","H","K"],["C","G","B","D","H","F","E","K"]],[["B","C","D","E","F","G","H","J"],["H","G","B","C","J","F","D","E"]],[["B","C","D","E","F","G","H","I"],["C","G","B","D","H","F","E","I"]],[["A","F","G","H","I","J","K","L"],["H","J","I","F","A","G","L","K"]],[["A","E","G","H","I","J","K","L"],["E","J","I","A","H","G","L","K"]],[["A","E","F","H","I","J","K","L"],["E","J","I","F","A","H","L","K"]],[["A","E","F","G","I","J","K","L"],["E","J","I","F","A","G","L","K"]],[["A","E","F","G","H","J","K","L"],["E","G","J","F","A","H","L","K"]],[["A","E","F","G","H","I","K","L"],["E","G","I","F","A","H","L","K"]],[["A","E","F","G","H","I","J","L"],["E","G","J","F","A","H","L","I"]],[["A","E","F","G","H","I","J","K"],["E","G","J","F","A","H","I","K"]],[["A","D","G","H","I","J","K","L"],["H","J","I","D","A","G","L","K"]],[["A","D","F","H","I","J","K","L"],["H","J","I","D","A","F","L","K"]],[["A","D","F","G","I","J","K","L"],["I","G","J","D","A","F","L","K"]],[["A","D","F","G","H","J","K","L"],["H","G","J","D","A","F","L","K"]],[["A","D","F","G","H","I","K","L"],["H","G","I","D","A","F","L","K"]],[["A","D","F","G","H","I","J","L"],["H","G","J","D","A","F","L","I"]],[["A","D","F","G","H","I","J","K"],["H","G","J","D","A","F","I","K"]],[["A","D","E","H","I","J","K","L"],["E","J","I","D","A","H","L","K"]],[["A","D","E","G","I","J","K","L"],["E","J","I","D","A","G","L","K"]],[["A","D","E","G","H","J","K","L"],["E","G","J","D","A","H","L","K"]],[["A","D","E","G","H","I","K","L"],["E","G","I","D","A","H","L","K"]],[["A","D","E","G","H","I","J","L"],["E","G","J","D","A","H","L","I"]],[["A","D","E","G","H","I","J","K"],["E","G","J","D","A","H","I","K"]],[["A","D","E","F","I","J","K","L"],["E","J","I","D","A","F","L","K"]],[["A","D","E","F","H","J","K","L"],["H","J","E","D","A","F","L","K"]],[["A","D","E","F","H","I","K","L"],["H","E","I","D","A","F","L","K"]],[["A","D","E","F","H","I","J","L"],["H","J","E","D","A","F","L","I"]],[["A","D","E","F","H","I","J","K"],["H","J","E","D","A","F","I","K"]],[["A","D","E","F","G","J","K","L"],["E","G","J","D","A","F","L","K"]],[["A","D","E","F","G","I","K","L"],["E","G","I","D","A","F","L","K"]],[["A","D","E","F","G","I","J","L"],["E","G","J","D","A","F","L","I"]],[["A","D","E","F","G","I","J","K"],["E","G","J","D","A","F","I","K"]],[["A","D","E","F","G","H","K","L"],["H","G","E","D","A","F","L","K"]],[["A","D","E","F","G","H","J","L"],["H","G","J","D","A","F","L","E"]],[["A","D","E","F","G","H","J","K"],["H","G","J","D","A","F","E","K"]],[["A","D","E","F","G","H","I","L"],["H","G","E","D","A","F","L","I"]],[["A","D","E","F","G","H","I","K"],["H","G","E","D","A","F","I","K"]],[["A","D","E","F","G","H","I","J"],["H","G","J","D","A","F","E","I"]],[["A","C","G","H","I","J","K","L"],["H","J","I","C","A","G","L","K"]],[["A","C","F","H","I","J","K","L"],["H","J","I","C","A","F","L","K"]],[["A","C","F","G","I","J","K","L"],["I","G","J","C","A","F","L","K"]],[["A","C","F","G","H","J","K","L"],["H","G","J","C","A","F","L","K"]],[["A","C","F","G","H","I","K","L"],["H","G","I","C","A","F","L","K"]],[["A","C","F","G","H","I","J","L"],["H","G","J","C","A","F","L","I"]],[["A","C","F","G","H","I","J","K"],["H","G","J","C","A","F","I","K"]],[["A","C","E","H","I","J","K","L"],["E","J","I","C","A","H","L","K"]],[["A","C","E","G","I","J","K","L"],["E","J","I","C","A","G","L","K"]],[["A","C","E","G","H","J","K","L"],["E","G","J","C","A","H","L","K"]],[["A","C","E","G","H","I","K","L"],["E","G","I","C","A","H","L","K"]],[["A","C","E","G","H","I","J","L"],["E","G","J","C","A","H","L","I"]],[["A","C","E","G","H","I","J","K"],["E","G","J","C","A","H","I","K"]],[["A","C","E","F","I","J","K","L"],["E","J","I","C","A","F","L","K"]],[["A","C","E","F","H","J","K","L"],["H","J","E","C","A","F","L","K"]],[["A","C","E","F","H","I","K","L"],["H","E","I","C","A","F","L","K"]],[["A","C","E","F","H","I","J","L"],["H","J","E","C","A","F","L","I"]],[["A","C","E","F","H","I","J","K"],["H","J","E","C","A","F","I","K"]],[["A","C","E","F","G","J","K","L"],["E","G","J","C","A","F","L","K"]],[["A","C","E","F","G","I","K","L"],["E","G","I","C","A","F","L","K"]],[["A","C","E","F","G","I","J","L"],["E","G","J","C","A","F","L","I"]],[["A","C","E","F","G","I","J","K"],["E","G","J","C","A","F","I","K"]],[["A","C","E","F","G","H","K","L"],["H","G","E","C","A","F","L","K"]],[["A","C","E","F","G","H","J","L"],["H","G","J","C","A","F","L","E"]],[["A","C","E","F","G","H","J","K"],["H","G","J","C","A","F","E","K"]],[["A","C","E","F","G","H","I","L"],["H","G","E","C","A","F","L","I"]],[["A","C","E","F","G","H","I","K"],["H","G","E","C","A","F","I","K"]],[["A","C","E","F","G","H","I","J"],["H","G","J","C","A","F","E","I"]],[["A","C","D","H","I","J","K","L"],["H","J","I","C","A","D","L","K"]],[["A","C","D","G","I","J","K","L"],["I","G","J","C","A","D","L","K"]],[["A","C","D","G","H","J","K","L"],["H","G","J","C","A","D","L","K"]],[["A","C","D","G","H","I","K","L"],["H","G","I","C","A","D","L","K"]],[["A","C","D","G","H","I","J","L"],["H","G","J","C","A","D","L","I"]],[["A","C","D","G","H","I","J","K"],["H","G","J","C","A","D","I","K"]],[["A","C","D","F","I","J","K","L"],["C","J","I","D","A","F","L","K"]],[["A","C","D","F","H","J","K","L"],["H","J","F","C","A","D","L","K"]],[["A","C","D","F","H","I","K","L"],["H","F","I","C","A","D","L","K"]],[["A","C","D","F","H","I","J","L"],["H","J","F","C","A","D","L","I"]],[["A","C","D","F","H","I","J","K"],["H","J","F","C","A","D","I","K"]],[["A","C","D","F","G","J","K","L"],["C","G","J","D","A","F","L","K"]],[["A","C","D","F","G","I","K","L"],["C","G","I","D","A","F","L","K"]],[["A","C","D","F","G","I","J","L"],["C","G","J","D","A","F","L","I"]],[["A","C","D","F","G","I","J","K"],["C","G","J","D","A","F","I","K"]],[["A","C","D","F","G","H","K","L"],["H","G","F","C","A","D","L","K"]],[["A","C","D","F","G","H","J","L"],["C","G","J","D","A","F","L","H"]],[["A","C","D","F","G","H","J","K"],["H","G","J","C","A","F","D","K"]],[["A","C","D","F","G","H","I","L"],["H","G","F","C","A","D","L","I"]],[["A","C","D","F","G","H","I","K"],["H","G","F","C","A","D","I","K"]],[["A","C","D","F","G","H","I","J"],["H","G","J","C","A","F","D","I"]],[["A","C","D","E","I","J","K","L"],["E","J","I","C","A","D","L","K"]],[["A","C","D","E","H","J","K","L"],["H","J","E","C","A","D","L","K"]],[["A","C","D","E","H","I","K","L"],["H","E","I","C","A","D","L","K"]],[["A","C","D","E","H","I","J","L"],["H","J","E","C","A","D","L","I"]],[["A","C","D","E","H","I","J","K"],["H","J","E","C","A","D","I","K"]],[["A","C","D","E","G","J","K","L"],["E","G","J","C","A","D","L","K"]],[["A","C","D","E","G","I","K","L"],["E","G","I","C","A","D","L","K"]],[["A","C","D","E","G","I","J","L"],["E","G","J","C","A","D","L","I"]],[["A","C","D","E","G","I","J","K"],["E","G","J","C","A","D","I","K"]],[["A","C","D","E","G","H","K","L"],["H","G","E","C","A","D","L","K"]],[["A","C","D","E","G","H","J","L"],["H","G","J","C","A","D","L","E"]],[["A","C","D","E","G","H","J","K"],["H","G","J","C","A","D","E","K"]],[["A","C","D","E","G","H","I","L"],["H","G","E","C","A","D","L","I"]],[["A","C","D","E","G","H","I","K"],["H","G","E","C","A","D","I","K"]],[["A","C","D","E","G","H","I","J"],["H","G","J","C","A","D","E","I"]],[["A","C","D","E","F","J","K","L"],["C","J","E","D","A","F","L","K"]],[["A","C","D","E","F","I","K","L"],["C","E","I","D","A","F","L","K"]],[["A","C","D","E","F","I","J","L"],["C","J","E","D","A","F","L","I"]],[["A","C","D","E","F","I","J","K"],["C","J","E","D","A","F","I","K"]],[["A","C","D","E","F","H","K","L"],["H","E","F","C","A","D","L","K"]],[["A","C","D","E","F","H","J","L"],["H","J","F","C","A","D","L","E"]],[["A","C","D","E","F","H","J","K"],["H","J","E","C","A","F","D","K"]],[["A","C","D","E","F","H","I","L"],["H","E","F","C","A","D","L","I"]],[["A","C","D","E","F","H","I","K"],["H","E","F","C","A","D","I","K"]],[["A","C","D","E","F","H","I","J"],["H","J","E","C","A","F","D","I"]],[["A","C","D","E","F","G","K","L"],["C","G","E","D","A","F","L","K"]],[["A","C","D","E","F","G","J","L"],["C","G","J","D","A","F","L","E"]],[["A","C","D","E","F","G","J","K"],["C","G","J","D","A","F","E","K"]],[["A","C","D","E","F","G","I","L"],["C","G","E","D","A","F","L","I"]],[["A","C","D","E","F","G","I","K"],["C","G","E","D","A","F","I","K"]],[["A","C","D","E","F","G","I","J"],["C","G","J","D","A","F","E","I"]],[["A","C","D","E","F","G","H","L"],["H","G","F","C","A","D","L","E"]],[["A","C","D","E","F","G","H","K"],["H","G","E","C","A","F","D","K"]],[["A","C","D","E","F","G","H","J"],["H","G","J","C","A","F","D","E"]],[["A","C","D","E","F","G","H","I"],["H","G","E","C","A","F","D","I"]],[["A","B","G","H","I","J","K","L"],["H","J","B","A","I","G","L","K"]],[["A","B","F","H","I","J","K","L"],["H","J","B","A","I","F","L","K"]],[["A","B","F","G","I","J","K","L"],["I","J","B","F","A","G","L","K"]],[["A","B","F","G","H","J","K","L"],["H","J","B","F","A","G","L","K"]],[["A","B","F","G","H","I","K","L"],["H","G","B","A","I","F","L","K"]],[["A","B","F","G","H","I","J","L"],["H","J","B","F","A","G","L","I"]],[["A","B","F","G","H","I","J","K"],["H","J","B","F","A","G","I","K"]],[["A","B","E","H","I","J","K","L"],["E","J","B","A","I","H","L","K"]],[["A","B","E","G","I","J","K","L"],["E","J","B","A","I","G","L","K"]],[["A","B","E","G","H","J","K","L"],["E","J","B","A","H","G","L","K"]],[["A","B","E","G","H","I","K","L"],["E","G","B","A","I","H","L","K"]],[["A","B","E","G","H","I","J","L"],["E","J","B","A","H","G","L","I"]],[["A","B","E","G","H","I","J","K"],["E","J","B","A","H","G","I","K"]],[["A","B","E","F","I","J","K","L"],["E","J","B","A","I","F","L","K"]],[["A","B","E","F","H","J","K","L"],["E","J","B","F","A","H","L","K"]],[["A","B","E","F","H","I","K","L"],["E","I","B","F","A","H","L","K"]],[["A","B","E","F","H","I","J","L"],["E","J","B","F","A","H","L","I"]],[["A","B","E","F","H","I","J","K"],["E","J","B","F","A","H","I","K"]],[["A","B","E","F","G","J","K","L"],["E","J","B","F","A","G","L","K"]],[["A","B","E","F","G","I","K","L"],["E","G","B","A","I","F","L","K"]],[["A","B","E","F","G","I","J","L"],["E","J","B","F","A","G","L","I"]],[["A","B","E","F","G","I","J","K"],["E","J","B","F","A","G","I","K"]],[["A","B","E","F","G","H","K","L"],["E","G","B","F","A","H","L","K"]],[["A","B","E","F","G","H","J","L"],["H","J","B","F","A","G","L","E"]],[["A","B","E","F","G","H","J","K"],["H","J","B","F","A","G","E","K"]],[["A","B","E","F","G","H","I","L"],["E","G","B","F","A","H","L","I"]],[["A","B","E","F","G","H","I","K"],["E","G","B","F","A","H","I","K"]],[["A","B","E","F","G","H","I","J"],["H","J","B","F","A","G","E","I"]],[["A","B","D","H","I","J","K","L"],["I","J","B","D","A","H","L","K"]],[["A","B","D","G","I","J","K","L"],["I","J","B","D","A","G","L","K"]],[["A","B","D","G","H","J","K","L"],["H","J","B","D","A","G","L","K"]],[["A","B","D","G","H","I","K","L"],["I","G","B","D","A","H","L","K"]],[["A","B","D","G","H","I","J","L"],["H","J","B","D","A","G","L","I"]],[["A","B","D","G","H","I","J","K"],["H","J","B","D","A","G","I","K"]],[["A","B","D","F","I","J","K","L"],["I","J","B","D","A","F","L","K"]],[["A","B","D","F","H","J","K","L"],["H","J","B","D","A","F","L","K"]],[["A","B","D","F","H","I","K","L"],["H","I","B","D","A","F","L","K"]],[["A","B","D","F","H","I","J","L"],["H","J","B","D","A","F","L","I"]],[["A","B","D","F","H","I","J","K"],["H","J","B","D","A","F","I","K"]],[["A","B","D","F","G","J","K","L"],["F","J","B","D","A","G","L","K"]],[["A","B","D","F","G","I","K","L"],["I","G","B","D","A","F","L","K"]],[["A","B","D","F","G","I","J","L"],["F","J","B","D","A","G","L","I"]],[["A","B","D","F","G","I","J","K"],["F","J","B","D","A","G","I","K"]],[["A","B","D","F","G","H","K","L"],["H","G","B","D","A","F","L","K"]],[["A","B","D","F","G","H","J","L"],["H","G","B","D","A","F","L","J"]],[["A","B","D","F","G","H","J","K"],["H","G","B","D","A","F","J","K"]],[["A","B","D","F","G","H","I","L"],["H","G","B","D","A","F","L","I"]],[["A","B","D","F","G","H","I","K"],["H","G","B","D","A","F","I","K"]],[["A","B","D","F","G","H","I","J"],["H","G","B","D","A","F","I","J"]],[["A","B","D","E","I","J","K","L"],["E","J","B","A","I","D","L","K"]],[["A","B","D","E","H","J","K","L"],["E","J","B","D","A","H","L","K"]],[["A","B","D","E","H","I","K","L"],["E","I","B","D","A","H","L","K"]],[["A","B","D","E","H","I","J","L"],["E","J","B","D","A","H","L","I"]],[["A","B","D","E","H","I","J","K"],["E","J","B","D","A","H","I","K"]],[["A","B","D","E","G","J","K","L"],["E","J","B","D","A","G","L","K"]],[["A","B","D","E","G","I","K","L"],["E","G","B","A","I","D","L","K"]],[["A","B","D","E","G","I","J","L"],["E","J","B","D","A","G","L","I"]],[["A","B","D","E","G","I","J","K"],["E","J","B","D","A","G","I","K"]],[["A","B","D","E","G","H","K","L"],["E","G","B","D","A","H","L","K"]],[["A","B","D","E","G","H","J","L"],["H","J","B","D","A","G","L","E"]],[["A","B","D","E","G","H","J","K"],["H","J","B","D","A","G","E","K"]],[["A","B","D","E","G","H","I","L"],["E","G","B","D","A","H","L","I"]],[["A","B","D","E","G","H","I","K"],["E","G","B","D","A","H","I","K"]],[["A","B","D","E","G","H","I","J"],["H","J","B","D","A","G","E","I"]],[["A","B","D","E","F","J","K","L"],["E","J","B","D","A","F","L","K"]],[["A","B","D","E","F","I","K","L"],["E","I","B","D","A","F","L","K"]],[["A","B","D","E","F","I","J","L"],["E","J","B","D","A","F","L","I"]],[["A","B","D","E","F","I","J","K"],["E","J","B","D","A","F","I","K"]],[["A","B","D","E","F","H","K","L"],["H","E","B","D","A","F","L","K"]],[["A","B","D","E","F","H","J","L"],["H","J","B","D","A","F","L","E"]],[["A","B","D","E","F","H","J","K"],["H","J","B","D","A","F","E","K"]],[["A","B","D","E","F","H","I","L"],["H","E","B","D","A","F","L","I"]],[["A","B","D","E","F","H","I","K"],["H","E","B","D","A","F","I","K"]],[["A","B","D","E","F","H","I","J"],["H","J","B","D","A","F","E","I"]],[["A","B","D","E","F","G","K","L"],["E","G","B","D","A","F","L","K"]],[["A","B","D","E","F","G","J","L"],["E","G","B","D","A","F","L","J"]],[["A","B","D","E","F","G","J","K"],["E","G","B","D","A","F","J","K"]],[["A","B","D","E","F","G","I","L"],["E","G","B","D","A","F","L","I"]],[["A","B","D","E","F","G","I","K"],["E","G","B","D","A","F","I","K"]],[["A","B","D","E","F","G","I","J"],["E","G","B","D","A","F","I","J"]],[["A","B","D","E","F","G","H","L"],["H","G","B","D","A","F","L","E"]],[["A","B","D","E","F","G","H","K"],["H","G","B","D","A","F","E","K"]],[["A","B","D","E","F","G","H","J"],["H","G","B","D","A","F","E","J"]],[["A","B","D","E","F","G","H","I"],["H","G","B","D","A","F","E","I"]],[["A","B","C","H","I","J","K","L"],["I","J","B","C","A","H","L","K"]],[["A","B","C","G","I","J","K","L"],["I","J","B","C","A","G","L","K"]],[["A","B","C","G","H","J","K","L"],["H","J","B","C","A","G","L","K"]],[["A","B","C","G","H","I","K","L"],["I","G","B","C","A","H","L","K"]],[["A","B","C","G","H","I","J","L"],["H","J","B","C","A","G","L","I"]],[["A","B","C","G","H","I","J","K"],["H","J","B","C","A","G","I","K"]],[["A","B","C","F","I","J","K","L"],["I","J","B","C","A","F","L","K"]],[["A","B","C","F","H","J","K","L"],["H","J","B","C","A","F","L","K"]],[["A","B","C","F","H","I","K","L"],["H","I","B","C","A","F","L","K"]],[["A","B","C","F","H","I","J","L"],["H","J","B","C","A","F","L","I"]],[["A","B","C","F","H","I","J","K"],["H","J","B","C","A","F","I","K"]],[["A","B","C","F","G","J","K","L"],["C","J","B","F","A","G","L","K"]],[["A","B","C","F","G","I","K","L"],["I","G","B","C","A","F","L","K"]],[["A","B","C","F","G","I","J","L"],["C","J","B","F","A","G","L","I"]],[["A","B","C","F","G","I","J","K"],["C","J","B","F","A","G","I","K"]],[["A","B","C","F","G","H","K","L"],["H","G","B","C","A","F","L","K"]],[["A","B","C","F","G","H","J","L"],["H","G","B","C","A","F","L","J"]],[["A","B","C","F","G","H","J","K"],["H","G","B","C","A","F","J","K"]],[["A","B","C","F","G","H","I","L"],["H","G","B","C","A","F","L","I"]],[["A","B","C","F","G","H","I","K"],["H","G","B","C","A","F","I","K"]],[["A","B","C","F","G","H","I","J"],["H","G","B","C","A","F","I","J"]],[["A","B","C","E","I","J","K","L"],["E","J","B","A","I","C","L","K"]],[["A","B","C","E","H","J","K","L"],["E","J","B","C","A","H","L","K"]],[["A","B","C","E","H","I","K","L"],["E","I","B","C","A","H","L","K"]],[["A","B","C","E","H","I","J","L"],["E","J","B","C","A","H","L","I"]],[["A","B","C","E","H","I","J","K"],["E","J","B","C","A","H","I","K"]],[["A","B","C","E","G","J","K","L"],["E","J","B","C","A","G","L","K"]],[["A","B","C","E","G","I","K","L"],["E","G","B","A","I","C","L","K"]],[["A","B","C","E","G","I","J","L"],["E","J","B","C","A","G","L","I"]],[["A","B","C","E","G","I","J","K"],["E","J","B","C","A","G","I","K"]],[["A","B","C","E","G","H","K","L"],["E","G","B","C","A","H","L","K"]],[["A","B","C","E","G","H","J","L"],["H","J","B","C","A","G","L","E"]],[["A","B","C","E","G","H","J","K"],["H","J","B","C","A","G","E","K"]],[["A","B","C","E","G","H","I","L"],["E","G","B","C","A","H","L","I"]],[["A","B","C","E","G","H","I","K"],["E","G","B","C","A","H","I","K"]],[["A","B","C","E","G","H","I","J"],["H","J","B","C","A","G","E","I"]],[["A","B","C","E","F","J","K","L"],["E","J","B","C","A","F","L","K"]],[["A","B","C","E","F","I","K","L"],["E","I","B","C","A","F","L","K"]],[["A","B","C","E","F","I","J","L"],["E","J","B","C","A","F","L","I"]],[["A","B","C","E","F","I","J","K"],["E","J","B","C","A","F","I","K"]],[["A","B","C","E","F","H","K","L"],["H","E","B","C","A","F","L","K"]],[["A","B","C","E","F","H","J","L"],["H","J","B","C","A","F","L","E"]],[["A","B","C","E","F","H","J","K"],["H","J","B","C","A","F","E","K"]],[["A","B","C","E","F","H","I","L"],["H","E","B","C","A","F","L","I"]],[["A","B","C","E","F","H","I","K"],["H","E","B","C","A","F","I","K"]],[["A","B","C","E","F","H","I","J"],["H","J","B","C","A","F","E","I"]],[["A","B","C","E","F","G","K","L"],["E","G","B","C","A","F","L","K"]],[["A","B","C","E","F","G","J","L"],["E","G","B","C","A","F","L","J"]],[["A","B","C","E","F","G","J","K"],["E","G","B","C","A","F","J","K"]],[["A","B","C","E","F","G","I","L"],["E","G","B","C","A","F","L","I"]],[["A","B","C","E","F","G","I","K"],["E","G","B","C","A","F","I","K"]],[["A","B","C","E","F","G","I","J"],["E","G","B","C","A","F","I","J"]],[["A","B","C","E","F","G","H","L"],["H","G","B","C","A","F","L","E"]],[["A","B","C","E","F","G","H","K"],["H","G","B","C","A","F","E","K"]],[["A","B","C","E","F","G","H","J"],["H","G","B","C","A","F","E","J"]],[["A","B","C","E","F","G","H","I"],["H","G","B","C","A","F","E","I"]],[["A","B","C","D","I","J","K","L"],["I","J","B","C","A","D","L","K"]],[["A","B","C","D","H","J","K","L"],["H","J","B","C","A","D","L","K"]],[["A","B","C","D","H","I","K","L"],["H","I","B","C","A","D","L","K"]],[["A","B","C","D","H","I","J","L"],["H","J","B","C","A","D","L","I"]],[["A","B","C","D","H","I","J","K"],["H","J","B","C","A","D","I","K"]],[["A","B","C","D","G","J","K","L"],["C","J","B","D","A","G","L","K"]],[["A","B","C","D","G","I","K","L"],["I","G","B","C","A","D","L","K"]],[["A","B","C","D","G","I","J","L"],["C","J","B","D","A","G","L","I"]],[["A","B","C","D","G","I","J","K"],["C","J","B","D","A","G","I","K"]],[["A","B","C","D","G","H","K","L"],["H","G","B","C","A","D","L","K"]],[["A","B","C","D","G","H","J","L"],["H","G","B","C","A","D","L","J"]],[["A","B","C","D","G","H","J","K"],["H","G","B","C","A","D","J","K"]],[["A","B","C","D","G","H","I","L"],["H","G","B","C","A","D","L","I"]],[["A","B","C","D","G","H","I","K"],["H","G","B","C","A","D","I","K"]],[["A","B","C","D","G","H","I","J"],["H","G","B","C","A","D","I","J"]],[["A","B","C","D","F","J","K","L"],["C","J","B","D","A","F","L","K"]],[["A","B","C","D","F","I","K","L"],["C","I","B","D","A","F","L","K"]],[["A","B","C","D","F","I","J","L"],["C","J","B","D","A","F","L","I"]],[["A","B","C","D","F","I","J","K"],["C","J","B","D","A","F","I","K"]],[["A","B","C","D","F","H","K","L"],["H","F","B","C","A","D","L","K"]],[["A","B","C","D","F","H","J","L"],["C","J","B","D","A","F","L","H"]],[["A","B","C","D","F","H","J","K"],["H","J","B","C","A","F","D","K"]],[["A","B","C","D","F","H","I","L"],["H","F","B","C","A","D","L","I"]],[["A","B","C","D","F","H","I","K"],["H","F","B","C","A","D","I","K"]],[["A","B","C","D","F","H","I","J"],["H","J","B","C","A","F","D","I"]],[["A","B","C","D","F","G","K","L"],["C","G","B","D","A","F","L","K"]],[["A","B","C","D","F","G","J","L"],["C","G","B","D","A","F","L","J"]],[["A","B","C","D","F","G","J","K"],["C","G","B","D","A","F","J","K"]],[["A","B","C","D","F","G","I","L"],["C","G","B","D","A","F","L","I"]],[["A","B","C","D","F","G","I","K"],["C","G","B","D","A","F","I","K"]],[["A","B","C","D","F","G","I","J"],["C","G","B","D","A","F","I","J"]],[["A","B","C","D","F","G","H","L"],["C","G","B","D","A","F","L","H"]],[["A","B","C","D","F","G","H","K"],["H","G","B","C","A","F","D","K"]],[["A","B","C","D","F","G","H","J"],["H","G","B","C","A","F","D","J"]],[["A","B","C","D","F","G","H","I"],["H","G","B","C","A","F","D","I"]],[["A","B","C","D","E","J","K","L"],["E","J","B","C","A","D","L","K"]],[["A","B","C","D","E","I","K","L"],["E","I","B","C","A","D","L","K"]],[["A","B","C","D","E","I","J","L"],["E","J","B","C","A","D","L","I"]],[["A","B","C","D","E","I","J","K"],["E","J","B","C","A","D","I","K"]],[["A","B","C","D","E","H","K","L"],["H","E","B","C","A","D","L","K"]],[["A","B","C","D","E","H","J","L"],["H","J","B","C","A","D","L","E"]],[["A","B","C","D","E","H","J","K"],["H","J","B","C","A","D","E","K"]],[["A","B","C","D","E","H","I","L"],["H","E","B","C","A","D","L","I"]],[["A","B","C","D","E","H","I","K"],["H","E","B","C","A","D","I","K"]],[["A","B","C","D","E","H","I","J"],["H","J","B","C","A","D","E","I"]],[["A","B","C","D","E","G","K","L"],["E","G","B","C","A","D","L","K"]],[["A","B","C","D","E","G","J","L"],["E","G","B","C","A","D","L","J"]],[["A","B","C","D","E","G","J","K"],["E","G","B","C","A","D","J","K"]],[["A","B","C","D","E","G","I","L"],["E","G","B","C","A","D","L","I"]],[["A","B","C","D","E","G","I","K"],["E","G","B","C","A","D","I","K"]],[["A","B","C","D","E","G","I","J"],["E","G","B","C","A","D","I","J"]],[["A","B","C","D","E","G","H","L"],["H","G","B","C","A","D","L","E"]],[["A","B","C","D","E","G","H","K"],["H","G","B","C","A","D","E","K"]],[["A","B","C","D","E","G","H","J"],["H","G","B","C","A","D","E","J"]],[["A","B","C","D","E","G","H","I"],["H","G","B","C","A","D","E","I"]],[["A","B","C","D","E","F","K","L"],["C","E","B","D","A","F","L","K"]],[["A","B","C","D","E","F","J","L"],["C","J","B","D","A","F","L","E"]],[["A","B","C","D","E","F","J","K"],["C","J","B","D","A","F","E","K"]],[["A","B","C","D","E","F","I","L"],["C","E","B","D","A","F","L","I"]],[["A","B","C","D","E","F","I","K"],["C","E","B","D","A","F","I","K"]],[["A","B","C","D","E","F","I","J"],["C","J","B","D","A","F","E","I"]],[["A","B","C","D","E","F","H","L"],["H","F","B","C","A","D","L","E"]],[["A","B","C","D","E","F","H","K"],["H","E","B","C","A","F","D","K"]],[["A","B","C","D","E","F","H","J"],["H","J","B","C","A","F","D","E"]],[["A","B","C","D","E","F","H","I"],["H","E","B","C","A","F","D","I"]],[["A","B","C","D","E","F","G","L"],["C","G","B","D","A","F","L","E"]],[["A","B","C","D","E","F","G","K"],["C","G","B","D","A","F","E","K"]],[["A","B","C","D","E","F","G","J"],["C","G","B","D","A","F","E","J"]],[["A","B","C","D","E","F","G","I"],["C","G","B","D","A","F","E","I"]],[["A","B","C","D","E","F","G","H"],["H","G","B","C","A","F","D","E"]]]};
 const TEAMS = APPDATA.teams;     // code -> [name, group]
 const FLAGS = {
   MEX:'🇲🇽', RSA:'🇿🇦', KOR:'🇰🇷', CZE:'🇨🇿',
@@ -317,9 +319,9 @@ const GROUPS = APPDATA.groups;   // letter -> [codes]
 const MATCHES = APPDATA.matches; // list of {id,group,md,home,away,hg,ag}
 const COMBO = APPDATA.combo;     // list of [groupsArr, assignArr]
 const GLETTERS = Object.keys(GROUPS);
- 
+
 function tname(code){ return TEAMS[code][0]; }
- 
+
 // ---------------- STATE ----------------
 let scores = {};
 function resetScoresToReal(){
@@ -331,9 +333,9 @@ function clearAllScores(){
   MATCHES.forEach(m => { scores[m.id] = {hg:null, ag:null}; });
 }
 resetScoresToReal();
- 
+
 let winners = {}; // bracket match code -> team code
- 
+
 // ---------------- GROUP COMPUTATION ----------------
 function computeGroup(letter){
   const codes = GROUPS[letter];
@@ -399,7 +401,7 @@ function findSlotAssign(best8set){
   }
   return null;
 }
- 
+
 // ---------------- BRACKET COMPUTATION ----------------
 function buildBracket(){
   const allGroups = computeAllGroups();
@@ -408,11 +410,11 @@ function buildBracket(){
   const slotAssign = findSlotAssign(best8); // winnerGroup -> thirdGroup
   const thirdByGroup = {};
   thirds.forEach(t => thirdByGroup[t.group] = t.code);
- 
+
   const W = g => allGroups[g][0].code;
   const R = g => allGroups[g][1].code;
   const T3 = g => thirdByGroup[g];
- 
+
   const r32 = {
     M73:[R('A'), R('B')],
     M74:[W('E'), T3(slotAssign['E'])],
@@ -431,7 +433,7 @@ function buildBracket(){
     M87:[W('K'), T3(slotAssign['K'])],
     M88:[R('D'), R('G')],
   };
- 
+
   function winnerOf(matchId, teams){
     const pick = winners[matchId];
     if(pick && teams.includes(pick)) return pick;
@@ -442,10 +444,10 @@ function buildBracket(){
     if(!w) return null;
     return teams.find(t => t !== w);
   }
- 
+
   const all = {...r32};
   function pair(idA, idB){ return [winnerOf(idA, all[idA]), winnerOf(idB, all[idB])]; }
- 
+
   all.M89 = pair('M74','M77');
   all.M90 = pair('M73','M75');
   all.M91 = pair('M76','M78');
@@ -454,26 +456,26 @@ function buildBracket(){
   all.M94 = pair('M81','M82');
   all.M95 = pair('M86','M88');
   all.M96 = pair('M85','M87');
- 
+
   all.M97 = pair('M89','M90');
   all.M98 = pair('M93','M94');
   all.M99 = pair('M91','M92');
   all.M100 = pair('M95','M96');
- 
+
   all.M101 = pair('M97','M98');
   all.M102 = pair('M99','M100');
- 
+
   all.M104 = pair('M101','M102'); // final
   // third place: losers of 101/102
   const t101 = all.M101, t102 = all.M102;
   all.M103 = [loserOf('M101', t101), loserOf('M102', t102)];
- 
+
   return {allGroups, thirds, best8, slotAssign, all};
 }
- 
+
 // ---------------- RENDER: GROUPS ----------------
 const groupsGrid = document.getElementById('groupsGrid');
- 
+
 function buildGroupCardDOM(letter){
   const card = document.createElement('div');
   card.className = 'group-card';
@@ -506,9 +508,9 @@ function buildGroupCardDOM(letter){
   });
   return card;
 }
- 
+
 GLETTERS.forEach(l => groupsGrid.appendChild(buildGroupCardDOM(l)));
- 
+
 function syncMatchInputsFromState(){
   document.querySelectorAll('#groupsGrid input[type=number]').forEach(inp => {
     const mid = inp.dataset.mid, side = inp.dataset.side;
@@ -516,7 +518,7 @@ function syncMatchInputsFromState(){
     inp.value = (v === null || v === undefined) ? '' : v;
   });
 }
- 
+
 groupsGrid.addEventListener('input', e => {
   const inp = e.target;
   if(inp.tagName !== 'INPUT') return;
@@ -530,7 +532,7 @@ groupsGrid.addEventListener('input', e => {
   renderBracket();
   updateProgress();
 });
- 
+
 function renderStandingsOnly(){
   const allGroups = computeAllGroups();
   const thirds = computeThirds(allGroups);
@@ -552,13 +554,13 @@ function renderStandingsOnly(){
       }).join('');
   });
 }
- 
+
 function updateProgress(){
   const total = MATCHES.length;
   const done = MATCHES.filter(m => scores[m.id].hg!==null && scores[m.id].ag!==null).length;
   document.getElementById('progressStat').textContent = `${done}/${total} partidos de grupos completados`;
 }
- 
+
 // ---------------- RENDER: THIRDS ----------------
 function renderThirds(){
   const allGroups = computeAllGroups();
@@ -574,16 +576,16 @@ function renderThirds(){
       </tr>`;
     }).join('');
 }
- 
+
 // ---------------- RENDER: BRACKET (layout engine + connector lines) ----------------
 const bracketWrap = document.getElementById('bracketWrap');
- 
+
 const CARD_W = 176, CARD_H = 72, UNIT = 92, GUTTER = 50, CENTER_W = 230, HEAD_H = 30;
 const HALF_W = 4*CARD_W + 3*GUTTER;
 const STAGE_H = 8*UNIT;
 const STAGE_W = HALF_W*2 + CENTER_W;
 const LINE_COLOR = '#333333';
- 
+
 // tree-consistent ordering so every adjacent pair (2i,2i+1) of round r feeds round r+1 index i
 const TREE = {
   left:  { r0:['M73','M75','M74','M77','M81','M82','M83','M84'],
@@ -596,9 +598,9 @@ const TREE = {
            r3:['M102'] },
 };
 const ROUND_LABELS = ['Dieciseisavos','Octavos','Cuartos','Semifinales'];
- 
+
 function pNum(matchId){ return 'P' + matchId.slice(1); }
- 
+
 function colX(side, r){ // x of the LEFT edge of a card in round r (0..3) for a given side, local to that half (0..HALF_W-CARD_W)
   return side === 'left' ? r*(CARD_W+GUTTER) : (3-r)*(CARD_W+GUTTER);
 }
@@ -606,7 +608,7 @@ function centerY(r, i){ // r=round index (0..3), i = match index within round
   const slot = UNIT * Math.pow(2, r);
   return i*slot + slot/2;
 }
- 
+
 function koTeamHTML(matchId, teams, idx){
   const code = teams[idx];
   const winnerCode = winners[matchId];
@@ -622,7 +624,7 @@ function koTeamHTML(matchId, teams, idx){
     <span class="flag">${flag}</span><span class="tn">${label}</span>${indicator}
   </button>`;
 }
- 
+
 function koCardHTML(matchId, teams, x, y, extraClass){
   return `<div class="ko-card ${extraClass||''}" style="left:${x}px; top:${y}px; width:${CARD_W}px; height:${CARD_H}px;">
     <div class="ko-card-head"><span>${pNum(matchId)}</span><span class="pen">PEN</span></div>
@@ -630,7 +632,7 @@ function koCardHTML(matchId, teams, x, y, extraClass){
     ${koTeamHTML(matchId, teams, 1)}
   </div>`;
 }
- 
+
 function decidedFraction(matchIds, all){
   const total = matchIds.length;
   const done = matchIds.filter(id => {
@@ -639,7 +641,7 @@ function decidedFraction(matchIds, all){
   }).length;
   return `${done}/${total}`;
 }
- 
+
 // Builds cards + header html + svg path commands for one half ('left' or 'right'), offset by xOffset
 function buildHalf(side, all, xOffset){
   let cardsHtml = '', headsHtml = '', pathD = '';
@@ -677,23 +679,23 @@ function buildHalf(side, all, xOffset){
   const stubX1 = (side==='left') ? xOffset+xSF+CARD_W : xOffset+xSF;
   const stubX2 = (side==='left') ? xOffset+HALF_W+18 : xOffset-18;
   pathD += `M${stubX1},${ySF} H${stubX2} `;
- 
+
   return {cardsHtml, headsHtml, pathD};
 }
- 
+
 function renderBracket(){
   const {all} = buildBracket();
- 
+
   const left = buildHalf('left', all, 0);
   const right = buildHalf('right', all, HALF_W + CENTER_W);
- 
+
   // center column: emblem, final card, 3rd place card — vertically centered in STAGE_H
   const cx = HALF_W; // left edge of center block
   const finalY = HEAD_H + STAGE_H/2 - CARD_H/2;
   const finalX = cx + (CENTER_W - CARD_W)/2;
   const thirdY = finalY + CARD_H + 46;
   const emblemY = finalY - 150;
- 
+
   const centerHtml = `
     <div class="ko-center-head" style="left:${cx}px; top:0px; width:${CENTER_W}px;">
       <span class="pipe">|</span><span class="final-lbl">Final</span><span class="pipe">|</span>
@@ -705,12 +707,12 @@ function renderBracket(){
     <div class="ko-3rd-label" style="left:${cx}px; top:${thirdY-22}px; width:${CENTER_W}px;">3er Puesto</div>
     ${koCardHTML('M103', all.M103, finalX, thirdY, 'is-third')}
   `;
- 
+
   const totalH = HEAD_H + STAGE_H;
   const svg = `<svg class="ko-lines" width="${STAGE_W}" height="${totalH}">
     <path d="${left.pathD}${right.pathD}" stroke="${LINE_COLOR}" stroke-width="1.5" fill="none"/>
   </svg>`;
- 
+
   bracketWrap.innerHTML = `<div class="ko-stage" style="width:${STAGE_W}px; height:${totalH}px;">
     ${svg}
     ${left.headsHtml}${right.headsHtml}
@@ -718,7 +720,7 @@ function renderBracket(){
     ${centerHtml}
   </div>`;
 }
- 
+
 bracketWrap.addEventListener('click', e => {
   const btn = e.target.closest('.ko-team');
   if(!btn || btn.disabled) return;
@@ -728,7 +730,7 @@ bracketWrap.addEventListener('click', e => {
   winners[matchId] = (winners[matchId] === code) ? null : code;
   renderBracket();
 });
- 
+
 // ---------------- TABS ----------------
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -738,7 +740,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
   });
 });
- 
+
 // ---------------- TOOLBAR ----------------
 document.getElementById('btnResetReal').addEventListener('click', () => {
   resetScoresToReal();
@@ -752,12 +754,12 @@ document.getElementById('btnClearAll').addEventListener('click', () => {
   syncMatchInputsFromState();
   renderStandingsOnly(); renderThirds(); renderBracket(); updateProgress();
 });
- 
+
 // ---------------- FULLSCREEN (cuadro eliminatorio) ----------------
 const koTheme = document.getElementById('koTheme');
 const btnFullscreen = document.getElementById('btnFullscreen');
 const btnFsClose = document.getElementById('btnFsClose');
- 
+
 function setKoFullscreen(on){
   koTheme.classList.toggle('is-fullscreen', on);
   document.body.classList.toggle('ko-fs-active', on);
@@ -769,7 +771,119 @@ btnFsClose.addEventListener('click', () => setKoFullscreen(false));
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && koTheme.classList.contains('is-fullscreen')) setKoFullscreen(false);
 });
- 
+
+// ---------------- API LIVE RESULTS (football-data.org) ----------------
+const API_KEY_LS = 'wc2026_fdorg_key';
+
+// TLAs que football-data.org usa distinto a los códigos FIFA de este sim
+const FD_TLA_ALIAS = {
+  'SAU': 'KSA',  // Saudi Arabia
+  'CRC': 'CRC',  // Costa Rica (no está, por si acaso)
+  'IRN': 'IRN',  // Iran — suele coincidir
+};
+
+// Mapa de nombres en inglés → código interno, para cuando el TLA no coincide
+const NAME_TO_CODE = {};
+Object.entries(TEAMS).forEach(([code, [nameEs]]) => {
+  NAME_TO_CODE[code.toLowerCase()] = code;
+});
+const EN_NAME_MAP = {
+  'mexico': 'MEX', 'south africa': 'RSA', 'korea republic': 'KOR', 'czechia': 'CZE',
+  'czech republic': 'CZE', 'canada': 'CAN', 'bosnia and herzegovina': 'BIH',
+  'qatar': 'QAT', 'switzerland': 'SUI', 'brazil': 'BRA', 'morocco': 'MAR',
+  'haiti': 'HAI', 'scotland': 'SCO', 'usa': 'USA', 'united states': 'USA',
+  'paraguay': 'PAR', 'australia': 'AUS', 'türkiye': 'TUR', 'turkey': 'TUR',
+  'germany': 'GER', 'curaçao': 'CUW', 'curacao': 'CUW', "côte d'ivoire": 'CIV',
+  'ivory coast': 'CIV', 'ecuador': 'ECU', 'netherlands': 'NED', 'japan': 'JPN',
+  'sweden': 'SWE', 'tunisia': 'TUN', 'belgium': 'BEL', 'egypt': 'EGY',
+  'ir iran': 'IRN', 'iran': 'IRN', 'new zealand': 'NZL', 'spain': 'ESP',
+  'cape verde': 'CPV', 'saudi arabia': 'KSA', 'uruguay': 'URU', 'france': 'FRA',
+  'senegal': 'SEN', 'iraq': 'IRQ', 'norway': 'NOR', 'argentina': 'ARG',
+  'algeria': 'ALG', 'austria': 'AUT', 'jordan': 'JOR', 'portugal': 'POR',
+  'dr congo': 'COD', 'congo dr': 'COD', 'democratic republic of congo': 'COD',
+  'uzbekistan': 'UZB', 'colombia': 'COL', 'england': 'ENG', 'croatia': 'CRO',
+  'ghana': 'GHA', 'panama': 'PAN',
+};
+
+function resolveTeamCode(tla, name) {
+  if (TEAMS[tla]) return tla;
+  const alias = FD_TLA_ALIAS[tla];
+  if (alias && TEAMS[alias]) return alias;
+  const byName = EN_NAME_MAP[(name || '').toLowerCase()];
+  if (byName) return byName;
+  return null;
+}
+
+const apiKeyInput = document.getElementById('apiKeyInput');
+const apiStatus   = document.getElementById('apiStatus');
+const btnFetchApi = document.getElementById('btnFetchApi');
+
+// Restaurar key guardada (default pre-cargada)
+const DEFAULT_API_KEY = 'c8b4b456ed2a44aa9bc626d32bf334be';
+if (!localStorage.getItem(API_KEY_LS)) localStorage.setItem(API_KEY_LS, DEFAULT_API_KEY);
+apiKeyInput.value = localStorage.getItem(API_KEY_LS);
+
+btnFetchApi.addEventListener('click', async () => {
+  const key = apiKeyInput.value.trim();
+  if (!key) { apiStatus.textContent = '⚠️ Ingresa tu API key primero.'; return; }
+  localStorage.setItem(API_KEY_LS, key);
+
+  btnFetchApi.disabled = true;
+  btnFetchApi.textContent = '⏳ Cargando…';
+  apiStatus.textContent = '';
+
+  // Cuando el archivo se abre como file://, el origen es "null" y la API bloquea el preflight.
+  // Usamos corsproxy.io como intermediario para que el origen sea válido.
+  const FD_URL = 'https://api.football-data.org/v4/competitions/WC/matches?season=2026';
+  const isFileOrigin = location.protocol === 'file:';
+  const fetchURL = isFileOrigin
+    ? 'https://corsproxy.io/?' + encodeURIComponent(FD_URL)
+    : FD_URL;
+
+  try {
+    const resp = await fetch(fetchURL, { headers: { 'X-Auth-Token': key } });
+    if (resp.status === 403) throw new Error('API key inválida o sin acceso al Mundial 2026');
+    if (!resp.ok) throw new Error(`Error HTTP ${resp.status}`);
+
+    const data = await resp.json();
+    let updated = 0, skipped = 0;
+
+    (data.matches || []).forEach(apiMatch => {
+      if (apiMatch.stage !== 'GROUP_STAGE') return;
+      if (apiMatch.status !== 'FINISHED') return;
+
+      const homeCode = resolveTeamCode(apiMatch.homeTeam.tla, apiMatch.homeTeam.name);
+      const awayCode = resolveTeamCode(apiMatch.awayTeam.tla, apiMatch.awayTeam.name);
+      if (!homeCode || !awayCode) { skipped++; return; }
+
+      const match = MATCHES.find(m => m.home === homeCode && m.away === awayCode);
+      if (!match) { skipped++; return; }
+
+      const hg = apiMatch.score.fullTime.home;
+      const ag = apiMatch.score.fullTime.away;
+      if (hg !== null && ag !== null) {
+        scores[match.id] = { hg, ag };
+        updated++;
+      }
+    });
+
+    winners = {};
+    syncMatchInputsFromState();
+    renderStandingsOnly(); renderThirds(); renderBracket(); updateProgress();
+
+    const ts = new Date().toLocaleTimeString('es');
+    apiStatus.textContent = `✅ ${updated} partidos actualizados · ${ts}`;
+    btnFetchApi.textContent = '🔄 Cargar resultados en vivo';
+    if (skipped) console.warn(`API: ${skipped} partidos no encontrados en el mapeo`);
+
+  } catch(e) {
+    apiStatus.textContent = `❌ ${e.message}`;
+    btnFetchApi.textContent = '🔄 Cargar resultados en vivo';
+  } finally {
+    btnFetchApi.disabled = false;
+  }
+});
+
 // ---------------- INIT ----------------
 syncMatchInputsFromState();
 renderStandingsOnly();
